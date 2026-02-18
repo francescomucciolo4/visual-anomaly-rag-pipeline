@@ -1,0 +1,21 @@
+# Ambiente virtuale
+anomaly_env/
+env/
+venv/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Modelli salvati
+*.pth
+
+# Dataset (non caricare MVTec!)
+bottle/
+data/
+
+# VS Code
+.vscode/
+
+# Jupyter
+.ipynb_checkpoints/
