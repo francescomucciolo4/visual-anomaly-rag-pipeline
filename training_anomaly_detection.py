@@ -20,6 +20,8 @@ def main():
 
     num_epochs = 20  # puoi aumentare a 30
     model.train()    # mette il modello in modalità training
+    
+    best_test_loss = float('inf')
 
     for epoch in range(num_epochs):
         epoch_loss = 0
@@ -50,6 +52,10 @@ def main():
                 loss_fn = loss(outputs, batch)
                 test_loss += loss_fn.item() * batch.size(0)
         test_loss /= len(test_loader.dataset)
+        if test_loss < best_test_loss:
+            best_test_loss = test_loss
+            torch.save(model.state_dict(), "best_autoencoder.pth")
+            print(f"Nuovo miglior modello salvato! Test Loss: {best_test_loss:.6f}")
 
         print(f"Epoch [{epoch+1}/{num_epochs}] - Train Loss: {epoch_loss:.6f}, Test Loss: {test_loss:.6f}")
     
