@@ -7,6 +7,7 @@ from PIL import Image
 import os
 
 from torch.utils.data import DataLoader
+from torch.utils.data import ConcatDataset
 
 
 
@@ -57,3 +58,23 @@ test_loader = DataLoader(
     batch_size=1,   # meglio 1 per analizzare ogni immagine singolarmente
     shuffle=False
 )
+
+# Cartella con tutte le anomalie di test
+anomaly_root = r"C:\Users\Francesco\Desktop\Progetto personale\bottle\test"
+
+anomaly_dataset = ConcatDataset([
+    MVTecDataset(os.path.join(anomaly_root, "broken_large"), transform=test_transforms),
+    MVTecDataset(os.path.join(anomaly_root, "broken_small"), transform=test_transforms),
+    MVTecDataset(os.path.join(anomaly_root, "contamination"), transform=test_transforms)
+])
+
+anomaly_loader = DataLoader(anomaly_dataset, batch_size=4, shuffle=False)
+
+ground_truth_root = r"C:\Users\Francesco\Desktop\Progetto personale\bottle\ground_truth"
+
+gt_dataset = ConcatDataset([
+    MVTecDataset(os.path.join(ground_truth_root, "broken_large"), transform=test_transforms),
+    MVTecDataset(os.path.join(ground_truth_root, "broken_small"), transform=test_transforms),
+    MVTecDataset(os.path.join(ground_truth_root, "contamination"), transform=test_transforms)
+])
+gt_loader = DataLoader(gt_dataset, batch_size=4, shuffle=False)
