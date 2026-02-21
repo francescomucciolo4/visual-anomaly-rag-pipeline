@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from cnn_anomaly_detection import Autoencoder
+from cnn_anomaly_detection import CAE256_Latent100
 from dataset_anomaly_detection import train_loader, test_loader
 from tqdm import tqdm
 
@@ -10,7 +10,7 @@ def main():
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     # Istanza del modello
-    model = Autoencoder().to(device)
+    model = CAE256_Latent100().to(device)
 
     # Loss function
     loss = nn.MSELoss()  # Mean Squared Error

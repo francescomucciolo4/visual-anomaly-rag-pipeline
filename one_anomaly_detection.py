@@ -1,5 +1,5 @@
 import torch
-from cnn_anomaly_detection import Autoencoder
+from cnn_anomaly_detection import CAE256_Latent100
 from dataset_anomaly_detection import test_transforms
 import matplotlib.pyplot as plt
 import numpy as np
@@ -22,7 +22,7 @@ os.makedirs(OUTPUT_DIR, exist_ok=True)
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # ---- Modello ----
-model = Autoencoder().to(device)
+model = CAE256_Latent100().to(device)
 model.load_state_dict(torch.load(MODEL_PATH, map_location=device))
 model.eval()
 
@@ -74,7 +74,7 @@ heatmap, stats = create_heatmap(orig, recon)
 heatmap_norm = (heatmap - heatmap.min()) / (heatmap.max() - heatmap.min() + 1e-8)
 
 # ---- Threshold temporanea ----
-threshold = 0.01
+threshold = np.percentile(heatmap_norm, 90)  # top 5% dei pixel più “errati”
 pred_mask = (heatmap_norm > threshold).astype(np.uint8)
 
 # Assicuriamoci che la GT sia binaria
@@ -100,8 +100,12 @@ overlay[fp] = [1, 0, 0]
 # Blu = False Negative
 overlay[fn] = [0, 0, 1]
 
+iou = np.sum(tp) / (np.sum(tp) + np.sum(fp) + np.sum(fn) + 1e-8)
+f1 = 2 * np.sum(tp) / (2 * np.sum(tp) + np.sum(fp) + np.sum(fn) + 1e-8)
 
 
+print(f"Iou={iou}")
+print(f"f1={f1}")
 print(f"MSE totale={stats['mse_total']:.6f}")
 print(f"MSE per canale={stats['mse_per_channel']}")
 print(f"Max={stats['max_error']:.6f}, Min={stats['min_error']:.6f}")

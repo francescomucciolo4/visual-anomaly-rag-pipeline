@@ -12,7 +12,7 @@ from torch.utils.data import ConcatDataset
 
 
 train_transforms = T.Compose([
-    T.Resize((128, 128)),  # ridimensiona le immagini da 900x900 a 128x128
+    T.Resize((256, 256)),  # ridimensiona le immagini da 900x900 a 256x256
     T.ToTensor(),           # converte in tensore PyTorch [0,1]
 ])
 
