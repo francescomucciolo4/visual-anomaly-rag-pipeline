@@ -15,7 +15,7 @@ bottle/
 data/
 inference_results_anomalies/
 inference_results_good/
-inference_ssim_results
+inference_ssim_results/
 
 
 # VS Code
