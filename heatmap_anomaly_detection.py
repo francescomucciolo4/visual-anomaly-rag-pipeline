@@ -1,5 +1,5 @@
 import torch
-from cnn_anomaly_detection import Autoencoder
+from cnn_anomaly_detection import CAE256_NoLinear
 from dataset_anomaly_detection import test_loader
 import matplotlib.pyplot as plt
 import numpy as np
@@ -14,7 +14,7 @@ os.makedirs(OUTPUT_DIR, exist_ok=True)
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # Modello
-model = Autoencoder().to(device)
+model = CAE256_NoLinear().to(device)
 model.load_state_dict(torch.load(MODEL_PATH, map_location=device))
 model.eval()
 
