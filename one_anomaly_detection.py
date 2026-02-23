@@ -1,5 +1,26 @@
+"""
+=============================================================================
+ANOMALY DETECTION CON SSIM - VERSIONE DIDATTICA
+=============================================================================
+
+COSA FA QUESTO SCRIPT:
+1. Carica un'immagine e la passa attraverso l'autoencoder
+2. Confronta l'originale con la ricostruzione usando SSIM
+3. Identifica le anomalie dove SSIM è basso (differenza strutturale)
+4. Applica una soglia per creare una maschera binaria
+5. Confronta con la ground truth
+
+PERCHÉ SSIM E NON MSE:
+- MSE confronta pixel per pixel (troppo sensibile a piccole variazioni)
+- SSIM confronta REGIONI (finestre 11x11) considerando:
+  * Luminanza (brightness)
+  * Contrasto (contrast)
+  * Struttura (pattern)
+- SSIM è più robusto al rumore e cattura meglio anomalie strutturali
+=============================================================================
+"""
+
 import torch
-import torch.nn.functional as F
 from cnn_anomaly_detection import CAE256_Latent100
 from dataset_anomaly_detection import test_transforms
 import matplotlib.pyplot as plt
@@ -7,222 +28,349 @@ import numpy as np
 import os
 from PIL import Image
 from skimage.metrics import structural_similarity as ssim
+from scipy import ndimage
+from skimage.morphology import remove_small_objects
 
-# ---- Config ----
+# =====================================================================
+# CONFIGURAZIONE
+# =====================================================================
+
 MODEL_PATH = r"C:\Users\Francesco\Desktop\Progetto personale\best_autoencoder.pth"
-
 ANOMALY_ROOT = r"C:\Users\Francesco\Desktop\Progetto personale\bottle\test"
 GT_ROOT = r"C:\Users\Francesco\Desktop\Progetto personale\bottle\ground_truth"
 
-CLASS_NAME = "broken_large"      # scegli la classe
-FILENAME = "000.png"             # scegli l'immagine
+CLASS_NAME = "broken_large"
+FILENAME = "000.png"
 
-OUTPUT_DIR = "inference_ssim_results"
+OUTPUT_DIR = "inference_ssim_clean"
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-# ---- Device ----
+# =====================================================================
+# CARICAMENTO MODELLO E DATI
+# =====================================================================
+
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-# ---- Modello ----
 model = CAE256_Latent100().to(device)
-model.load_state_dict(torch.load(MODEL_PATH, map_location=device))
+model.load_state_dict(torch.load(MODEL_PATH, map_location=device, weights_only=False))
 model.eval()
 
-# ---- Caricamento immagine e GT ----
 img_path = os.path.join(ANOMALY_ROOT, CLASS_NAME, FILENAME)
-gt_path = os.path.join(
-    GT_ROOT,
-    CLASS_NAME,
-    FILENAME.replace(".png", "_mask.png")
-)
+gt_path = os.path.join(GT_ROOT, CLASS_NAME, FILENAME.replace(".png", "_mask.png"))
 
 img = Image.open(img_path).convert("RGB")
 gt = Image.open(gt_path).convert("L")
 
 img_tensor = test_transforms(img).unsqueeze(0).to(device)
-gt_tensor = test_transforms(gt).squeeze().cpu().numpy()  # per visualizzazione
+gt_tensor = test_transforms(gt).squeeze().cpu().numpy()
 
 
-def compute_ssim_heatmap(original, reconstructed, window_size=11):
+# =====================================================================
+# PASSO 1: CALCOLO SSIM
+# =====================================================================
+
+print("\n" + "="*70)
+print("PASSO 1: CALCOLO STRUCTURAL SIMILARITY INDEX (SSIM)")
+print("="*70)
+
+def compute_ssim_anomaly_map(original, reconstructed):
     """
-    Calcola la heatmap SSIM tra l'immagine originale e quella ricostruita.
+    Calcola una mappa di anomalie usando SSIM.
+    
+    LOGICA:
+    1. SSIM confronta due immagini usando finestre locali (11x11 pixel)
+    2. Per ogni finestra, calcola un valore tra -1 e 1:
+       - 1 = immagini identiche (NESSUNA anomalia)
+       - 0 = completamente diverse (ALTA anomalia)
+    3. Restituisce una mappa dove ogni pixel ha il suo SSIM score
     
     Args:
-        original: Tensor (C, H, W) - immagine originale
-        reconstructed: Tensor (C, H, W) - immagine ricostruita
-        window_size: dimensione della finestra per SSIM (default 11x11)
+        original: immagine originale (Tensor C×H×W)
+        reconstructed: immagine ricostruita (Tensor C×H×W)
     
     Returns:
-        ssim_map: numpy array (H, W) - mappa SSIM (valori alti = simili, bassi = anomalie)
-        stats: dizionario con statistiche
+        anomaly_map: mappa 2D dove valori ALTI = anomalie
+        ssim_global: SSIM medio dell'intera immagine
     """
-    # Converti in numpy e trasforma in (H, W, C)
+    # Converti da (C, H, W) a (H, W, C) per skimage
     orig_np = original.permute(1, 2, 0).cpu().numpy()
     recon_np = reconstructed.permute(1, 2, 0).cpu().numpy()
     
-    # Calcola SSIM con mappa completa
-    # full=True restituisce sia lo score globale che la mappa pixel-wise
-    ssim_score, ssim_map = ssim(
+    print(f"[DEBUG] Original image: min={orig_np.min():.4f}, max={orig_np.max():.4f}")
+    print(f"[DEBUG] Reconstructed image: min={recon_np.min():.4f}, max={recon_np.max():.4f}")
+    
+    print("\n[1.1] Calcolo SSIM con finestre 11x11...")
+    
+    # Calcola SSIM
+    # - win_size=11: usa finestre di 11×11 pixel
+    # - channel_axis=2: i canali RGB sono sull'asse 2
+    # - data_range=1.0: i valori sono normalizzati tra 0 e 1
+    # - full=True: restituisce sia lo score globale che la mappa pixel-wise
+    ssim_global, ssim_map = ssim(
         orig_np, 
         recon_np, 
-        win_size=window_size,
-        channel_axis=2,  # specifica che i canali sono sull'ultimo asse
-        data_range=1.0,  # assumiamo che le immagini siano normalizzate [0, 1]
+        win_size=11,
+        channel_axis=2,
+        data_range=1.0,
         full=True
     )
     
-    # SSIM restituisce una mappa (H, W, C) quando ci sono più canali
-    # Prendiamo la media sui canali per ottenere una mappa 2D
+    print(f"      SSIM globale: {ssim_global:.4f}")
+    print(f"      (1.0 = perfetto, 0.0 = completamente diverso)")
+    
+    # Se abbiamo 3 canali, fai la media per ottenere una mappa 2D
     if len(ssim_map.shape) == 3:
         ssim_map = ssim_map.mean(axis=2)
+        print(f"      Mappa SSIM: shape {ssim_map.shape} (media sui 3 canali RGB)")
     
-    # SSIM restituisce valori tra -1 e 1, dove 1 = identico
-    # Per anomalie vogliamo valori alti dove c'è differenza
-    # Quindi invertiamo: anomaly_map = 1 - SSIM
+    print("\n[1.2] Conversione in mappa di anomalie...")
+    # SSIM alto (vicino a 1) = simile = NESSUNA anomalia
+    # Quindi invertiamo: anomaly = 1 - SSIM
+    # Risultato: valori ALTI nella mappa = ANOMALIE
     anomaly_map = 1.0 - ssim_map
     
-    # Statistiche
-    stats = {
-        "ssim_global": ssim_score,
-        "anomaly_mean": np.mean(anomaly_map),
-        "anomaly_std": np.std(anomaly_map),
-        "anomaly_max": np.max(anomaly_map),
-        "anomaly_min": np.min(anomaly_map)
-    }
+    print(f"      Anomaly score min: {anomaly_map.min():.4f}")
+    print(f"      Anomaly score max: {anomaly_map.max():.4f}")
+    print(f"      Anomaly score medio: {anomaly_map.mean():.4f}")
     
-    return anomaly_map, stats
+    return anomaly_map, ssim_global
 
 
-def compute_mse_heatmap(original, reconstructed):
+# Esegui inference
+with torch.no_grad():
+    output = model(img_tensor)
+
+original = img_tensor[0]
+reconstructed = output[0]
+
+# Calcola mappa SSIM
+anomaly_map, ssim_score = compute_ssim_anomaly_map(original, reconstructed)
+
+# Stampa SSIM globale
+print("SSIM globale:", ssim_score)
+
+# Stampa mappa delle anomalie
+print("Anomaly map shape:", anomaly_map.shape)
+print("Anomaly map valori min/max/mean:", anomaly_map.min(), anomaly_map.max(), anomaly_map.mean())
+
+# Se vuoi stampare tutta la matrice (attenzione, è grande!)
+print("Anomaly map completa:\n", anomaly_map)
+
+
+# =====================================================================
+# PASSO 2: NORMALIZZAZIONE
+# =====================================================================
+
+print("\n" + "="*70)
+print("PASSO 2: NORMALIZZAZIONE DELLA MAPPA")
+print("="*70)
+
+print("\n[2.1] Normalizzazione tra 0 e 1...")
+# Porta tutti i valori tra 0 e 1 per facilitare il thresholding
+anomaly_map_norm = (anomaly_map - anomaly_map.min()) / (anomaly_map.max() - anomaly_map.min() + 1e-8)
+
+print(f"      Nuovo range: [{anomaly_map_norm.min():.4f}, {anomaly_map_norm.max():.4f}]")
+
+
+# =====================================================================
+# PASSO 3: THRESHOLDING
+# =====================================================================
+
+print("\n" + "="*70)
+print("PASSO 3: APPLICAZIONE SOGLIA (THRESHOLD)")
+print("="*70)
+
+print("""
+PERCHÉ USIAMO UNA SOGLIA:
+La mappa di anomalie è continua (valori tra 0 e 1), ma noi vogliamo
+una risposta binaria: ANOMALO o NORMALE.
+
+METODO PERCENTILE:
+- Ordina tutti i pixel dal meno al più anomalo
+- Prende il 95° percentile come soglia
+- Solo il TOP 5% dei pixel più anomali viene marcato
+- Questo riduce i falsi positivi (pixel normali che sembrano leggermente diversi)
+""")
+
+def apply_threshold(anomaly_map, percentile=95):
     """
-    Calcola la heatmap MSE classica per confronto.
-    """
-    error_pixel = original - reconstructed
-    error_squared = error_pixel ** 2
-    heatmap = error_squared.mean(dim=0).cpu().numpy()
-    
-    stats = {
-        "mse_total": error_squared.mean().item(),
-        "mse_max": error_squared.max().item(),
-        "mse_min": error_squared.min().item()
-    }
-    
-    return heatmap, stats
-
-
-def adaptive_threshold(heatmap, method='percentile', percentile=95, factor=3.0):
-    """
-    Applica una soglia adattiva alla heatmap.
+    Applica una soglia percentile alla mappa di anomalie.
     
     Args:
-        heatmap: numpy array - mappa delle anomalie (deve essere 2D)
-        method: 'percentile', 'otsu', 'mean_std'
-        percentile: percentile da usare se method='percentile'
-        factor: fattore moltiplicativo per mean+std se method='mean_std'
+        anomaly_map: mappa continua di anomalie
+        percentile: quale percentile usare (95 = top 5%)
     
     Returns:
         threshold: valore della soglia
-        binary_mask: maschera binaria
+        binary_mask: maschera binaria (1=anomalo, 0=normale)
     """
-    # Assicurati che sia 2D
-    if len(heatmap.shape) > 2:
-        heatmap = heatmap.mean(axis=-1)
+    threshold = np.percentile(anomaly_map, percentile)
+    binary_mask = (anomaly_map > threshold).astype(np.uint8)
     
-    if method == 'percentile':
-        threshold = np.percentile(heatmap, percentile)
+    num_anomalous = binary_mask.sum()
+    total_pixels = binary_mask.size
+    percentage = (num_anomalous / total_pixels) * 100
     
-    elif method == 'mean_std':
-        mean = np.mean(heatmap)
-        std = np.std(heatmap)
-        threshold = mean + factor * std
-    
-    elif method == 'otsu':
-        # Implementazione semplice di Otsu
-        from skimage.filters import threshold_otsu
-        # Otsu richiede un'immagine 2D
-        threshold = threshold_otsu(heatmap)
-    
-    else:
-        raise ValueError(f"Unknown thresholding method: {method}")
-    
-    binary_mask = (heatmap > threshold).astype(np.uint8)
+    print(f"\n[3.1] Soglia calcolata: {threshold:.4f}")
+    print(f"      Pixel anomali: {num_anomalous} / {total_pixels} ({percentage:.2f}%)")
     
     return threshold, binary_mask
 
 
-def post_process_mask(mask, min_area=50):
+threshold, binary_mask = apply_threshold(anomaly_map_norm, percentile=95)
+
+
+# =====================================================================
+# PASSO 4: POST-PROCESSING
+# =====================================================================
+
+print("\n" + "="*70)
+print("PASSO 4: POST-PROCESSING (PULIZIA DELLA MASCHERA)")
+print("="*70)
+
+print("""
+PROBLEMA: La maschera binaria può avere "rumore" (pixel isolati).
+SOLUZIONE: Morphological operations
+
+1. BINARY CLOSING: Connette regioni vicine
+   - Usa un kernel 5×5
+   - "Chiude" piccoli buchi
+   - Connette pixel anomali vicini
+
+2. REMOVE SMALL OBJECTS: Rimuove componenti connessi troppo piccoli
+   - Solo gruppi di almeno 50 pixel vengono mantenuti
+   - Elimina rumore isolato
+""")
+
+def post_process_mask(mask, min_area=50, kernel_size=5):
     """
-    Post-processing della maschera per rimuovere rumore.
+    Pulisce la maschera binaria.
     
     Args:
-        mask: maschera binaria (H, W)
-        min_area: area minima per mantenere un componente connesso
+        mask: maschera binaria grezza
+        min_area: dimensione minima di un'anomalia valida (in pixel)
+        kernel_size: dimensione del kernel per closing
     
     Returns:
         cleaned_mask: maschera pulita
     """
-    from skimage.morphology import remove_small_objects
-    from scipy import ndimage
     
-    # Assicurati che sia 2D
-    if len(mask.shape) > 2:
-        mask = mask.mean(axis=-1)
-    
-    # Converti in bool
     mask_bool = mask.astype(bool)
     
-    # Chiusura morfologica usando scipy (più robusto)
-    # Usa un kernel 5x5
-    kernel = np.ones((5, 5), dtype=bool)
-    mask_closed = ndimage.binary_closing(mask_bool, structure=kernel, iterations=1)
+    # Closing morfologico
+    print(f"\n[4.1] Binary closing con kernel {kernel_size}×{kernel_size}...")
+    kernel = np.ones((kernel_size, kernel_size), dtype=bool)
+    mask_closed = ndimage.binary_closing(mask_bool, structure=kernel)
     
-    # Rimuovi piccoli oggetti (rumore)
+    before_pixels = mask_bool.sum()
+    after_closing = mask_closed.sum()
+    print(f"      Pixel anomali prima: {before_pixels}")
+    print(f"      Pixel anomali dopo closing: {after_closing}")
+    
+    # Rimozione oggetti piccoli
+    print(f"\n[4.2] Rimozione componenti < {min_area} pixel...")
     try:
         mask_cleaned = remove_small_objects(mask_closed, min_size=min_area)
+        after_cleaning = mask_cleaned.sum()
+        removed = after_closing - after_cleaning
+        print(f"      Pixel rimossi (rumore): {removed}")
+        print(f"      Pixel finali: {after_cleaning}")
     except:
-        # Se fallisce, ritorna la maschera chiusa senza rimuovere piccoli oggetti
         mask_cleaned = mask_closed
+        print(f"      (Fallback: nessuna rimozione)")
     
     return mask_cleaned.astype(np.uint8)
 
 
+binary_mask_clean = post_process_mask(binary_mask, min_area=50, kernel_size=5)
+
+
+# =====================================================================
+# PASSO 5: VALUTAZIONE
+# =====================================================================
+
+print("\n" + "="*70)
+print("PASSO 5: CONFRONTO CON GROUND TRUTH")
+print("="*70)
+
+print("""
+METRICHE UTILIZZATE:
+
+1. IoU (Intersection over Union):
+   - Quanto le nostre predizioni si sovrappongono alla GT
+   - IoU = Area(Predizione ∩ GT) / Area(Predizione ∪ GT)
+   - Range: 0 (pessimo) a 1 (perfetto)
+
+2. Precision (Precisione):
+   - Dei pixel che diciamo anomali, quanti lo sono davvero?
+   - Precision = True Positives / (True Positives + False Positives)
+
+3. Recall (Sensibilità):
+   - Delle anomalie reali, quante ne troviamo?
+   - Recall = True Positives / (True Positives + False Negatives)
+
+4. F1 Score:
+   - Media armonica di Precision e Recall
+   - Bilancia i due obiettivi
+""")
+
 def compute_metrics(pred_mask, gt_mask):
-    """
-    Calcola metriche di valutazione.
-    """
-    # Assicuriamoci che siano binarie
+    """Calcola metriche di valutazione."""
     pred = pred_mask.astype(bool)
     gt = gt_mask.astype(bool)
     
-    # True/False Positives/Negatives
-    tp = np.logical_and(pred, gt).sum()
-    fp = np.logical_and(pred, ~gt).sum()
-    fn = np.logical_and(~pred, gt).sum()
-    tn = np.logical_and(~pred, ~gt).sum()
+    tp = np.logical_and(pred, gt).sum()  # True Positives
+    fp = np.logical_and(pred, ~gt).sum() # False Positives
+    fn = np.logical_and(~pred, gt).sum() # False Negatives
+    tn = np.logical_and(~pred, ~gt).sum()# True Negatives
     
-    # Metriche
     iou = tp / (tp + fp + fn + 1e-8)
     precision = tp / (tp + fp + 1e-8)
     recall = tp / (tp + fn + 1e-8)
     f1 = 2 * tp / (2 * tp + fp + fn + 1e-8)
-    accuracy = (tp + tn) / (tp + tn + fp + fn + 1e-8)
     
     return {
         "IoU": iou,
         "Precision": precision,
         "Recall": recall,
         "F1": f1,
-        "Accuracy": accuracy,
-        "TP": tp,
-        "FP": fp,
-        "FN": fn,
-        "TN": tn
+        "TP": int(tp),
+        "FP": int(fp),
+        "FN": int(fn),
+        "TN": int(tn)
     }
 
 
+gt_binary = (gt_tensor > 0).astype(np.uint8)
+metrics = compute_metrics(binary_mask_clean, gt_binary)
+
+print("\n[5.1] Risultati:")
+print(f"      IoU (Intersection over Union): {metrics['IoU']:.4f}")
+print(f"      Precision (Precisione):        {metrics['Precision']:.4f}")
+print(f"      Recall (Sensibilità):          {metrics['Recall']:.4f}")
+print(f"      F1 Score (Bilanciamento):      {metrics['F1']:.4f}")
+
+print(f"\n[5.2] Conteggio pixel:")
+print(f"      True Positives  (TP): {metrics['TP']:6d} ✓ (anomalie trovate correttamente)")
+print(f"      False Positives (FP): {metrics['FP']:6d} ✗ (falsi allarmi)")
+print(f"      False Negatives (FN): {metrics['FN']:6d} ✗ (anomalie mancate)")
+print(f"      True Negatives  (TN): {metrics['TN']:6d} ✓ (pixel normali corretti)")
+
+
+# =====================================================================
+# PASSO 6: VISUALIZZAZIONE
+# =====================================================================
+
+print("\n" + "="*70)
+print("PASSO 6: CREAZIONE VISUALIZZAZIONI")
+print("="*70)
+
 def create_overlay(pred_mask, gt_mask):
     """
-    Crea overlay colorato: Verde=TP, Rosso=FP, Blu=FN
+    Crea un overlay colorato per visualizzare errori:
+    - Verde: True Positives (anomalie trovate correttamente)
+    - Rosso: False Positives (falsi allarmi)
+    - Blu: False Negatives (anomalie mancate)
     """
     pred = pred_mask.astype(bool)
     gt = gt_mask.astype(bool)
@@ -232,172 +380,80 @@ def create_overlay(pred_mask, gt_mask):
     fn = np.logical_and(~pred, gt)
     
     overlay = np.zeros((gt.shape[0], gt.shape[1], 3))
-    overlay[tp] = [0, 1, 0]   # Verde
-    overlay[fp] = [1, 0, 0]   # Rosso
-    overlay[fn] = [0, 0, 1]   # Blu
+    overlay[tp] = [0, 1, 0]  # Verde
+    overlay[fp] = [1, 0, 0]  # Rosso
+    overlay[fn] = [0, 0, 1]  # Blu
     
     return overlay
 
 
-# =====================================================================
-# INFERENCE
-# =====================================================================
+overlay = create_overlay(binary_mask_clean, gt_binary)
 
-print("=" * 70)
-print("SSIM-BASED ANOMALY DETECTION")
-print("=" * 70)
+# ---- Visualizzazione completa ----
+fig, axs = plt.subplots(2, 4, figsize=(20, 10))
+fig.suptitle('SSIM-Based Anomaly Detection - Step by Step', fontsize=16, fontweight='bold')
 
-with torch.no_grad():
-    output = model(img_tensor)
-
-orig = img_tensor[0]
-recon = output[0]
-
-# ---- 1. Calcola heatmap SSIM ----
-print("\n[1] Calculating SSIM heatmap...")
-ssim_heatmap, ssim_stats = compute_ssim_heatmap(orig, recon, window_size=11)
-
-print(f"  Global SSIM: {ssim_stats['ssim_global']:.4f}")
-print(f"  Anomaly score (mean): {ssim_stats['anomaly_mean']:.4f}")
-print(f"  Anomaly score (max): {ssim_stats['anomaly_max']:.4f}")
-
-# ---- 2. Calcola heatmap MSE (per confronto) ----
-print("\n[2] Calculating MSE heatmap (for comparison)...")
-mse_heatmap, mse_stats = compute_mse_heatmap(orig, recon)
-mse_heatmap_norm = (mse_heatmap - mse_heatmap.min()) / (mse_heatmap.max() - mse_heatmap.min() + 1e-8)
-
-print(f"  Global MSE: {mse_stats['mse_total']:.6f}")
-
-# ---- 3. Normalizza SSIM heatmap ----
-ssim_heatmap_norm = (ssim_heatmap - ssim_heatmap.min()) / (ssim_heatmap.max() - ssim_heatmap.min() + 1e-8)
-
-# ---- 4. Applica threshold adattivo ----
-print("\n[3] Applying adaptive threshold...")
-
-# Prova diversi metodi di thresholding
-threshold_ssim_95, mask_ssim_95 = adaptive_threshold(ssim_heatmap_norm, method='percentile', percentile=95)
-threshold_ssim_otsu, mask_ssim_otsu = adaptive_threshold(ssim_heatmap_norm, method='otsu')
-threshold_mse_95, mask_mse_95 = adaptive_threshold(mse_heatmap_norm, method='percentile', percentile=95)
-
-print(f"  SSIM threshold (95th percentile): {threshold_ssim_95:.4f}")
-print(f"  SSIM threshold (Otsu): {threshold_ssim_otsu:.4f}")
-print(f"  MSE threshold (95th percentile): {threshold_mse_95:.4f}")
-
-# ---- 5. Post-processing ----
-print("\n[4] Post-processing masks...")
-mask_ssim_95_clean = post_process_mask(mask_ssim_95, min_area=50)
-mask_ssim_otsu_clean = post_process_mask(mask_ssim_otsu, min_area=50)
-mask_mse_95_clean = post_process_mask(mask_mse_95, min_area=50)
-
-# ---- 6. Ground Truth ----
-gt_binary = (gt_tensor > 0).astype(np.uint8)
-
-# ---- 7. Calcola metriche ----
-print("\n[5] Computing metrics...")
-print("\n--- SSIM (95th percentile) ---")
-metrics_ssim_95 = compute_metrics(mask_ssim_95_clean, gt_binary)
-for k, v in metrics_ssim_95.items():
-    print(f"  {k}: {v:.4f}" if isinstance(v, float) else f"  {k}: {v}")
-
-print("\n--- SSIM (Otsu threshold) ---")
-metrics_ssim_otsu = compute_metrics(mask_ssim_otsu_clean, gt_binary)
-for k, v in metrics_ssim_otsu.items():
-    print(f"  {k}: {v:.4f}" if isinstance(v, float) else f"  {k}: {v}")
-
-print("\n--- MSE (95th percentile) ---")
-metrics_mse_95 = compute_metrics(mask_mse_95_clean, gt_binary)
-for k, v in metrics_mse_95.items():
-    print(f"  {k}: {v:.4f}" if isinstance(v, float) else f"  {k}: {v}")
-
-# ---- 8. Crea overlays ----
-overlay_ssim_95 = create_overlay(mask_ssim_95_clean, gt_binary)
-overlay_ssim_otsu = create_overlay(mask_ssim_otsu_clean, gt_binary)
-overlay_mse_95 = create_overlay(mask_mse_95_clean, gt_binary)
-
-# =====================================================================
-# VISUALIZZAZIONE
-# =====================================================================
-
-print("\n[6] Creating visualizations...")
-
-# ---- Plot 1: Confronto heatmap ----
-fig1, axs = plt.subplots(2, 4, figsize=(20, 10))
-
-axs[0, 0].imshow(orig.permute(1, 2, 0).cpu().numpy())
-axs[0, 0].set_title("Original Image", fontsize=12, fontweight='bold')
+# Riga 1: Input e processing
+axs[0, 0].imshow(original.permute(1, 2, 0).cpu().numpy())
+axs[0, 0].set_title("1. Original Image", fontsize=12, fontweight='bold')
 axs[0, 0].axis('off')
 
-axs[0, 1].imshow(recon.permute(1, 2, 0).cpu().numpy())
-axs[0, 1].set_title("Reconstructed", fontsize=12, fontweight='bold')
+axs[0, 1].imshow(reconstructed.permute(1, 2, 0).cpu().numpy())
+axs[0, 1].set_title("2. Autoencoder\nReconstruction", fontsize=12, fontweight='bold')
 axs[0, 1].axis('off')
 
-im1 = axs[0, 2].imshow(ssim_heatmap_norm, cmap='hot', vmin=0, vmax=1)
-axs[0, 2].set_title(f"SSIM Heatmap\n(SSIM={ssim_stats['ssim_global']:.3f})", fontsize=12, fontweight='bold')
+im1 = axs[0, 2].imshow(anomaly_map_norm, cmap='hot', vmin=0, vmax=1)
+axs[0, 2].set_title(f"3. SSIM Anomaly Map\n(Global SSIM={ssim_score:.3f})", fontsize=12, fontweight='bold')
 axs[0, 2].axis('off')
 plt.colorbar(im1, ax=axs[0, 2], fraction=0.046, pad=0.04)
 
-im2 = axs[0, 3].imshow(mse_heatmap_norm, cmap='hot', vmin=0, vmax=1)
-axs[0, 3].set_title(f"MSE Heatmap\n(MSE={mse_stats['mse_total']:.4f})", fontsize=12, fontweight='bold')
+axs[0, 3].imshow(binary_mask, cmap='gray')
+axs[0, 3].set_title(f"4. Binary Mask\n(Threshold={threshold:.3f})", fontsize=12, fontweight='bold')
 axs[0, 3].axis('off')
-plt.colorbar(im2, ax=axs[0, 3], fraction=0.046, pad=0.04)
 
-axs[1, 0].imshow(gt_binary, cmap='gray')
-axs[1, 0].set_title("Ground Truth", fontsize=12, fontweight='bold')
+# Riga 2: Risultati
+axs[1, 0].imshow(binary_mask_clean, cmap='gray')
+axs[1, 0].set_title("5. Cleaned Mask\n(After Post-processing)", fontsize=12, fontweight='bold')
 axs[1, 0].axis('off')
 
-axs[1, 1].imshow(mask_ssim_95_clean, cmap='gray')
-axs[1, 1].set_title(f"SSIM Mask (p95)\nIoU={metrics_ssim_95['IoU']:.3f}", fontsize=12, fontweight='bold')
+axs[1, 1].imshow(gt_binary, cmap='gray')
+axs[1, 1].set_title("6. Ground Truth", fontsize=12, fontweight='bold')
 axs[1, 1].axis('off')
 
-axs[1, 2].imshow(mask_ssim_otsu_clean, cmap='gray')
-axs[1, 2].set_title(f"SSIM Mask (Otsu)\nIoU={metrics_ssim_otsu['IoU']:.3f}", fontsize=12, fontweight='bold')
+axs[1, 2].imshow(overlay)
+axs[1, 2].set_title("7. Error Analysis\nGreen=TP, Red=FP, Blue=FN", fontsize=12, fontweight='bold')
 axs[1, 2].axis('off')
 
-axs[1, 3].imshow(mask_mse_95_clean, cmap='gray')
-axs[1, 3].set_title(f"MSE Mask (p95)\nIoU={metrics_mse_95['IoU']:.3f}", fontsize=12, fontweight='bold')
+# Metrics display
 axs[1, 3].axis('off')
+metrics_text = f"""
+FINAL METRICS:
+
+IoU:       {metrics['IoU']:.4f}
+Precision: {metrics['Precision']:.4f}
+Recall:    {metrics['Recall']:.4f}
+F1 Score:  {metrics['F1']:.4f}
+
+PIXEL COUNT:
+TP: {metrics['TP']:,}
+FP: {metrics['FP']:,}
+FN: {metrics['FN']:,}
+TN: {metrics['TN']:,}
+"""
+axs[1, 3].text(0.1, 0.5, metrics_text, fontsize=11, family='monospace',
+               verticalalignment='center',
+               bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.5))
 
 plt.tight_layout()
-plt.savefig(os.path.join(OUTPUT_DIR, "comparison_heatmaps.png"), dpi=150, bbox_inches='tight')
+plt.savefig(os.path.join(OUTPUT_DIR, "ssim_pipeline_complete.png"), dpi=150, bbox_inches='tight')
 plt.close()
 
-# ---- Plot 2: Overlays dettagliati ----
+print(f"\n[6.1] Visualizzazione salvata: ssim_pipeline_complete.png")
+
+# ---- Visualizzazione semplificata ----
 fig2, axs = plt.subplots(1, 4, figsize=(20, 5))
 
-axs[0].imshow(gt_binary, cmap='gray')
-axs[0].set_title("Ground Truth", fontsize=14, fontweight='bold')
-axs[0].axis('off')
-
-axs[1].imshow(overlay_ssim_95)
-axs[1].set_title(f"SSIM (p95) - F1={metrics_ssim_95['F1']:.3f}\nGreen=TP, Red=FP, Blue=FN", fontsize=12, fontweight='bold')
-axs[1].axis('off')
-
-axs[2].imshow(overlay_ssim_otsu)
-axs[2].set_title(f"SSIM (Otsu) - F1={metrics_ssim_otsu['F1']:.3f}\nGreen=TP, Red=FP, Blue=FN", fontsize=12, fontweight='bold')
-axs[2].axis('off')
-
-axs[3].imshow(overlay_mse_95)
-axs[3].set_title(f"MSE (p95) - F1={metrics_mse_95['F1']:.3f}\nGreen=TP, Red=FP, Blue=FN", fontsize=12, fontweight='bold')
-axs[3].axis('off')
-
-plt.tight_layout()
-plt.savefig(os.path.join(OUTPUT_DIR, "comparison_overlays.png"), dpi=150, bbox_inches='tight')
-plt.close()
-
-# ---- Plot 3: Side-by-side migliore risultato ----
-# Scegli il metodo migliore (in base a F1)
-best_method = max(
-    [("SSIM-p95", metrics_ssim_95, mask_ssim_95_clean, overlay_ssim_95),
-     ("SSIM-Otsu", metrics_ssim_otsu, mask_ssim_otsu_clean, overlay_ssim_otsu),
-     ("MSE-p95", metrics_mse_95, mask_mse_95_clean, overlay_mse_95)],
-    key=lambda x: x[1]['F1']
-)
-
-best_name, best_metrics, best_mask, best_overlay = best_method
-
-fig3, axs = plt.subplots(1, 4, figsize=(20, 5))
-
-axs[0].imshow(orig.permute(1, 2, 0).cpu().numpy())
+axs[0].imshow(original.permute(1, 2, 0).cpu().numpy())
 axs[0].set_title("Original", fontsize=14, fontweight='bold')
 axs[0].axis('off')
 
@@ -405,21 +461,57 @@ axs[1].imshow(gt_binary, cmap='gray')
 axs[1].set_title("Ground Truth", fontsize=14, fontweight='bold')
 axs[1].axis('off')
 
-axs[2].imshow(best_mask, cmap='gray')
-axs[2].set_title(f"Prediction ({best_name})", fontsize=14, fontweight='bold')
+axs[2].imshow(binary_mask_clean, cmap='gray')
+axs[2].set_title("SSIM Prediction", fontsize=14, fontweight='bold')
 axs[2].axis('off')
 
-axs[3].imshow(best_overlay)
-axs[3].set_title(f"Overlay ({best_name})\nF1={best_metrics['F1']:.3f} | IoU={best_metrics['IoU']:.3f}", 
-                 fontsize=14, fontweight='bold')
+axs[3].imshow(overlay)
+axs[3].set_title(f"Results\nF1={metrics['F1']:.4f} | IoU={metrics['IoU']:.4f}", 
+                 fontsize=14, fontweight='bold', color='darkgreen')
 axs[3].axis('off')
 
 plt.tight_layout()
-plt.savefig(os.path.join(OUTPUT_DIR, "best_result.png"), dpi=150, bbox_inches='tight')
+plt.savefig(os.path.join(OUTPUT_DIR, "ssim_results_simple.png"), dpi=150, bbox_inches='tight')
 plt.close()
 
-print(f"\n{'='*70}")
-print(f"✓ Inference completata!")
-print(f"✓ Risultati salvati in '{OUTPUT_DIR}'")
-print(f"✓ Metodo migliore: {best_name} (F1={best_metrics['F1']:.3f})")
-print(f"{'='*70}\n")
+print(f"[6.2] Visualizzazione salvata: ssim_results_simple.png")
+
+
+# =====================================================================
+# RIEPILOGO FINALE
+# =====================================================================
+
+print("\n" + "="*70)
+print("RIEPILOGO FINALE")
+print("="*70)
+
+print(f"""
+PIPELINE SSIM COMPLETA:
+
+1. AUTOENCODER
+   ↓ L'autoencoder tenta di ricostruire l'immagine
+   ↓ Immagini con difetti vengono ricostruite male
+   
+2. SSIM COMPARISON
+   ↓ SSIM confronta originale vs ricostruita usando finestre 11×11
+   ↓ Genera mappa di anomalie (1-SSIM)
+   ↓ Global SSIM: {ssim_score:.4f}
+   
+3. THRESHOLDING
+   ↓ Soglia al 95° percentile: {threshold:.4f}
+   ↓ {binary_mask.sum()} pixel marcati come anomali
+   
+4. POST-PROCESSING
+   ↓ Binary closing (kernel 5×5)
+   ↓ Rimozione oggetti < 50 pixel
+   ↓ {binary_mask_clean.sum()} pixel finali
+   
+5. EVALUATION
+   ↓ Confronto con Ground Truth
+   ✓ F1 Score: {metrics['F1']:.4f}
+   ✓ IoU: {metrics['IoU']:.4f}
+
+RISULTATI SALVATI IN: {OUTPUT_DIR}
+""")
+
+print("="*70 + "\n")
