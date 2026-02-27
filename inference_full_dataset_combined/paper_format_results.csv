@@ -1,0 +1,2 @@
+Method,Per_Region_Overlap,Image_ROC_AUC,Pixel_ROC_AUC,broken_large_overlap,broken_small_overlap,contamination_overlap,num_good,num_anomalies
+COMBINED,0.2230690316161894,0.4126984126984127,0.8401974875206805,0.3547696339489466,0.222815669922029,0.09790531307411245,20,63
