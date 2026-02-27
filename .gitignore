@@ -10,8 +10,9 @@ __pycache__/
 # Modelli salvati
 *.pth
 
-# Dataset (non caricare MVTec!)
+# Dataset 
 bottle/
+
 
 
 # VS Code
