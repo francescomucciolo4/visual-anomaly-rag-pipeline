@@ -1,138 +1,138 @@
-"""
-HYPERPARAMETER OPTIMIZATION: Post-Processing Parameters
-Trova i valori ottimali di:
-- min_area: dimensione minima degli oggetti da mantenere
-- kernel_size: dimensione del kernel per binary closing
-"""
-
 import torch
-from cnn_anomaly_detection import CAE256_Latent100
-from dataset_anomaly_detection import test_transforms
+import torch.nn.functional as F
+from cnn_anomaly_detection import CAE256_FC_Latent32
+from dataset_anomaly_detection import val_transforms
+from training_anomaly_detection import SSIMLoss
 import matplotlib.pyplot as plt
 import numpy as np
 import os
 from PIL import Image
-from skimage.metrics import structural_similarity as ssim
 from scipy import ndimage
 from skimage.morphology import remove_small_objects
 from skimage.filters import threshold_otsu
 from itertools import product
 import pandas as pd
-import seaborn as sns
+
+
+# =====================================================================
+# SSIM PIXEL-LEVEL
+# =====================================================================
+
+class SSIMLoss_PixelLevel(SSIMLoss):
+    def forward(self, img1, img2):
+        (_, channel, _, _) = img1.size()
+        
+        if self.window.device != img1.device:
+            self.window = self.window.to(img1.device)
+            self.window = self.window.type_as(img1)
+        
+        mu1 = F.conv2d(img1, self.window, padding=self.window_size//2, groups=channel)
+        mu2 = F.conv2d(img2, self.window, padding=self.window_size//2, groups=channel)
+        
+        mu1_sq = mu1.pow(2)
+        mu2_sq = mu2.pow(2)
+        mu1_mu2 = mu1 * mu2
+        
+        sigma1_sq = F.conv2d(img1*img1, self.window, padding=self.window_size//2, groups=channel) - mu1_sq
+        sigma2_sq = F.conv2d(img2*img2, self.window, padding=self.window_size//2, groups=channel) - mu2_sq
+        sigma12 = F.conv2d(img1*img2, self.window, padding=self.window_size//2, groups=channel) - mu1_mu2
+        
+        C1 = 0.01**2
+        C2 = 0.03**2
+        
+        ssim_map = ((2*mu1_mu2 + C1)*(2*sigma12 + C2)) / \
+                   ((mu1_sq + mu2_sq + C1)*(sigma1_sq + sigma2_sq + C2))
+        
+        return 1 - ssim_map.mean(dim=1)
+
 
 # =====================================================================
 # CONFIGURAZIONE
 # =====================================================================
 
-MODEL_PATH = r"C:\Users\Francesco\Desktop\Progetto personale\best_autoencoder.pth"
+MODEL_PATH_BASE = r"C:\Users\Francesco\Desktop\Progetto personale"
 ANOMALY_ROOT = r"C:\Users\Francesco\Desktop\Progetto personale\bottle\test"
 GT_ROOT = r"C:\Users\Francesco\Desktop\Progetto personale\bottle\ground_truth"
 
-CLASS_NAME = "broken_large"
-FILENAME = "000.png"
+# Test su tutte le categorie
+TEST_CASES = [
+    {"class": "broken_large", "filename": "000.png"},
+    {"class": "broken_small", "filename": "000.png"},
+    {"class": "contamination", "filename": "000.png"}
+]
 
-OUTPUT_DIR = "inference_hyperopt_postprocess"
+ANOMALY_METHOD = 'combined'  # 'mse', 'ssim', 'combined'
+
+if ANOMALY_METHOD == 'mse':
+    MODEL_PATH = os.path.join(MODEL_PATH_BASE, "best_autoencoder_mse.pth")
+elif ANOMALY_METHOD == 'ssim':
+    MODEL_PATH = os.path.join(MODEL_PATH_BASE, "best_autoencoder_ssim.pth")
+elif ANOMALY_METHOD == 'combined':
+    MODEL_PATH = os.path.join(MODEL_PATH_BASE, "best_autoencoder_combined.pth")
+else:
+    raise ValueError(f"Unknown ANOMALY_METHOD: {ANOMALY_METHOD}")
+
+print(f"\n📂 Loading model: {MODEL_PATH}")
+print(f"🔍 Anomaly detection method: {ANOMALY_METHOD.upper()}\n")
+
+OUTPUT_DIR = f"inference_hyperopt_fullgrid_{ANOMALY_METHOD}"
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-model = CAE256_Latent100().to(device)
-model.load_state_dict(torch.load(MODEL_PATH, map_location=device, weights_only=False))
+model = CAE256_FC_Latent32().to(device)
+model.load_state_dict(torch.load(MODEL_PATH, map_location=device))
 model.eval()
-
-img_path = os.path.join(ANOMALY_ROOT, CLASS_NAME, FILENAME)
-gt_path = os.path.join(GT_ROOT, CLASS_NAME, FILENAME.replace(".png", "_mask.png"))
-
-img = Image.open(img_path).convert("RGB")
-gt = Image.open(gt_path).convert("L")
-
-img_tensor = test_transforms(img).unsqueeze(0).to(device)
-gt_tensor = test_transforms(gt).squeeze().cpu().numpy()
-
-# =====================================================================
-# COMPUTE SSIM
-# =====================================================================
-
-print("="*70)
-print("HYPERPARAMETER OPTIMIZATION FOR POST-PROCESSING")
-print("="*70)
-
-with torch.no_grad():
-    output = model(img_tensor)
-
-original = img_tensor[0]
-reconstructed = output[0]
-
-orig_np = original.permute(1, 2, 0).cpu().numpy()
-recon_np = reconstructed.permute(1, 2, 0).cpu().numpy()
-
-ssim_global, ssim_map = ssim(
-    orig_np, recon_np,
-    win_size=11,
-    channel_axis=2,
-    data_range=1.0,
-    full=True
-)
-
-if len(ssim_map.shape) == 3:
-    ssim_map = ssim_map.mean(axis=2)
-
-anomaly_map = 1.0 - ssim_map
-anomaly_map_norm = (anomaly_map - anomaly_map.min()) / (anomaly_map.max() - anomaly_map.min() + 1e-8)
-
-print(f"\nGlobal SSIM: {ssim_global:.4f}")
-
-gt_binary = (gt_tensor > 0).astype(np.uint8)
-
-# Soglie per Method 3 (Weighted Union)
-threshold_high = np.percentile(anomaly_map_norm, 97)
-threshold_low = threshold_otsu(anomaly_map_norm)
-
-print(f"Thresholds: High={threshold_high:.4f}, Low={threshold_low:.4f}")
 
 # =====================================================================
 # HELPER FUNCTIONS
 # =====================================================================
 
-def weighted_union_threshold(anomaly_map, high_thresh, low_thresh, distance_thresh=5):
-    """Method 3: Weighted Union con distance threshold configurabile."""
-    from scipy.ndimage import distance_transform_edt
+def compute_anomaly_map(img_tensor, model, method):
+    with torch.no_grad():
+        output = model(img_tensor)
     
+    if method == 'mse':
+        mse_map = F.mse_loss(output, img_tensor, reduction='none')
+        anomaly_map = mse_map.mean(dim=1)[0].cpu().numpy()
+        
+    elif method == 'ssim':
+        ssim_calculator = SSIMLoss_PixelLevel().to(device)
+        ssim_map_tensor = ssim_calculator(output, img_tensor)
+        anomaly_map = ssim_map_tensor[0].cpu().numpy()
+        
+    elif method == 'combined':
+        mse_map = F.mse_loss(output, img_tensor, reduction='none').mean(dim=1)[0].cpu().numpy()
+        mse_norm = (mse_map - mse_map.min()) / (mse_map.max() - mse_map.min() + 1e-8)
+        
+        ssim_calculator = SSIMLoss_PixelLevel().to(device)
+        ssim_map_tensor = ssim_calculator(output, img_tensor)
+        ssim_map = ssim_map_tensor[0].cpu().numpy()
+        ssim_norm = (ssim_map - ssim_map.min()) / (ssim_map.max() - ssim_map.min() + 1e-8)
+        
+        anomaly_map = 0.4 * mse_norm + 0.6 * ssim_norm
+    
+    anomaly_map_norm = (anomaly_map - anomaly_map.min()) / (anomaly_map.max() - anomaly_map.min() + 1e-8)
+    return anomaly_map_norm
+
+
+def weighted_union_threshold(anomaly_map, high_thresh, low_thresh, distance_thresh=5):
+    from scipy.ndimage import distance_transform_edt
     seeds = (anomaly_map > high_thresh).astype(np.uint8)
     candidates = (anomaly_map > low_thresh).astype(np.uint8)
-    
     distance_from_seeds = distance_transform_edt(~seeds.astype(bool))
-    
-    nearby_candidates = np.logical_and(
-        candidates.astype(bool),
-        distance_from_seeds <= distance_thresh
-    )
-    
+    nearby_candidates = np.logical_and(candidates.astype(bool), distance_from_seeds <= distance_thresh)
     final_mask = np.logical_or(seeds, nearby_candidates).astype(np.uint8)
-    
     return final_mask
 
 
 def post_process_mask(mask, min_area=50, kernel_size=5, iterations=1):
-    """
-    Post-processing configurabile.
-    
-    Args:
-        mask: maschera binaria
-        min_area: dimensione minima oggetti (in pixel)
-        kernel_size: dimensione kernel per closing (deve essere dispari)
-        iterations: numero di iterazioni di closing
-    """
     mask_bool = mask.astype(bool)
-    
-    # Binary closing
     if kernel_size > 0:
         kernel = np.ones((kernel_size, kernel_size), dtype=bool)
         mask_closed = ndimage.binary_closing(mask_bool, structure=kernel, iterations=iterations)
     else:
         mask_closed = mask_bool
-    
-    # Remove small objects
     if min_area > 0:
         try:
             mask_cleaned = remove_small_objects(mask_closed, min_size=min_area)
@@ -140,399 +140,393 @@ def post_process_mask(mask, min_area=50, kernel_size=5, iterations=1):
             mask_cleaned = mask_closed
     else:
         mask_cleaned = mask_closed
-    
     return mask_cleaned.astype(np.uint8)
 
 
 def compute_metrics(pred_mask, gt_mask):
-    """Calcola metriche."""
     pred = pred_mask.astype(bool)
     gt = gt_mask.astype(bool)
-    
     tp = np.logical_and(pred, gt).sum()
     fp = np.logical_and(pred, ~gt).sum()
     fn = np.logical_and(~pred, gt).sum()
-    
     iou = tp / (tp + fp + fn + 1e-8)
     precision = tp / (tp + fp + 1e-8)
     recall = tp / (tp + fn + 1e-8)
     f1 = 2 * tp / (2 * tp + fp + fn + 1e-8)
-    
-    return {
-        "IoU": iou,
-        "Precision": precision,
-        "Recall": recall,
-        "F1": f1
-    }
+    return {"IoU": iou, "Precision": precision, "Recall": recall, "F1": f1}
 
 
 # =====================================================================
-# HYPERPARAMETER GRID SEARCH
+# FULL GRID SEARCH
 # =====================================================================
 
-print("\n" + "="*70)
-print("GRID SEARCH: Post-Processing Hyperparameters")
-print("="*70)
+print("="*80)
+print(f"FULL GRID SEARCH OPTIMIZATION - METHOD: {ANOMALY_METHOD.upper()}")
+print("="*80)
 
-# Genera raw mask (prima del post-processing)
-raw_mask = weighted_union_threshold(anomaly_map_norm, threshold_high, threshold_low, distance_thresh=5)
-
-# Baseline (senza post-processing)
-metrics_no_postproc = compute_metrics(raw_mask, gt_binary)
-print(f"\nBaseline (NO post-processing):")
-print(f"  F1={metrics_no_postproc['F1']:.4f} | IoU={metrics_no_postproc['IoU']:.4f} | "
-      f"Prec={metrics_no_postproc['Precision']:.4f} | Rec={metrics_no_postproc['Recall']:.4f}")
-
-# Definisci range di iperparametri da testare
-print("\n[1] Testing Post-Processing Hyperparameters...")
-
+# Definisci tutti gli iperparametri da testare
 hyperparams = {
-    "min_area": [0, 10, 20, 30, 40, 50, 75, 100, 150, 200],
-    "kernel_size": [0, 3, 5, 7, 9, 11],
-    "iterations": [1, 2]
+    "percentile": [90, 92, 94, 95, 96, 97, 98, 99],
+    "min_area": [0, 10, 20, 30, 40, 50, 75, 100],
+    "kernel_size": [0, 3, 5, 7, 9],
+    "iterations": [1, 2],
+    "distance_thresh": [3, 4, 5, 6, 7, 8, 10]
 }
 
-print(f"\nParameter ranges:")
-print(f"  min_area: {hyperparams['min_area']}")
-print(f"  kernel_size: {hyperparams['kernel_size']}")
-print(f"  iterations: {hyperparams['iterations']}")
+all_class_results = []
 
-total_combinations = len(hyperparams['min_area']) * len(hyperparams['kernel_size']) * len(hyperparams['iterations'])
-print(f"\nTotal combinations to test: {total_combinations}")
-
-# Grid search
-results = []
-test_count = 0
-
-for min_area, kernel_size, iterations in product(
-    hyperparams['min_area'],
-    hyperparams['kernel_size'],
-    hyperparams['iterations']
-):
-    test_count += 1
+for test_case in TEST_CASES:
+    class_name = test_case["class"]
+    filename = test_case["filename"]
     
-    # Post-process
-    mask_postproc = post_process_mask(raw_mask, min_area=min_area, 
-                                     kernel_size=kernel_size, 
-                                     iterations=iterations)
+    print(f"\n{'='*80}")
+    print(f"CLASS: {class_name.upper()} | FILE: {filename}")
+    print(f"{'='*80}")
     
-    # Evaluate
-    metrics = compute_metrics(mask_postproc, gt_binary)
+    # Load image and GT
+    img_path = os.path.join(ANOMALY_ROOT, class_name, filename)
+    gt_path = os.path.join(GT_ROOT, class_name, filename.replace(".png", "_mask.png"))
     
-    results.append({
-        "min_area": min_area,
-        "kernel_size": kernel_size,
-        "iterations": iterations,
-        "F1": metrics['F1'],
-        "IoU": metrics['IoU'],
-        "Precision": metrics['Precision'],
-        "Recall": metrics['Recall']
+    img = Image.open(img_path).convert("RGB")
+    gt = Image.open(gt_path).convert("L")
+    
+    img_tensor = val_transforms(img).unsqueeze(0).to(device)
+    gt_tensor = val_transforms(gt).squeeze().cpu().numpy()
+    gt_binary = (gt_tensor > 0).astype(np.uint8)
+    
+    # Compute anomaly map
+    anomaly_map_norm = compute_anomaly_map(img_tensor, model, ANOMALY_METHOD)
+    
+    print(f"\nAnomaly map range: [{anomaly_map_norm.min():.4f}, {anomaly_map_norm.max():.4f}]")
+    
+    # =====================================================================
+    # FULL GRID SEARCH
+    # =====================================================================
+    
+    threshold_low = threshold_otsu(anomaly_map_norm)
+    
+    total_combinations = (len(hyperparams['percentile']) * 
+                         len(hyperparams['min_area']) * 
+                         len(hyperparams['kernel_size']) * 
+                         len(hyperparams['iterations']) * 
+                         len(hyperparams['distance_thresh']))
+    
+    print(f"\n[FULL GRID SEARCH] Testing {total_combinations} combinations...")
+    print(f"  Percentiles: {len(hyperparams['percentile'])}")
+    print(f"  Min areas: {len(hyperparams['min_area'])}")
+    print(f"  Kernel sizes: {len(hyperparams['kernel_size'])}")
+    print(f"  Iterations: {len(hyperparams['iterations'])}")
+    print(f"  Distance thresholds: {len(hyperparams['distance_thresh'])}")
+    
+    results = []
+    test_count = 0
+    
+    for percentile, min_area, kernel_size, iterations, distance_thresh in product(
+        hyperparams['percentile'],
+        hyperparams['min_area'],
+        hyperparams['kernel_size'],
+        hyperparams['iterations'],
+        hyperparams['distance_thresh']
+    ):
+        test_count += 1
+        
+        # Compute threshold_high based on percentile
+        threshold_high = np.percentile(anomaly_map_norm, percentile)
+        
+        # Generate mask
+        raw_mask = weighted_union_threshold(anomaly_map_norm, threshold_high, threshold_low, 
+                                           distance_thresh=distance_thresh)
+        
+        # Post-process
+        mask_final = post_process_mask(raw_mask, min_area=min_area, 
+                                       kernel_size=kernel_size, 
+                                       iterations=iterations)
+        
+        # Evaluate
+        metrics = compute_metrics(mask_final, gt_binary)
+        
+        results.append({
+            "percentile": percentile,
+            "threshold_high": threshold_high,
+            "min_area": min_area,
+            "kernel_size": kernel_size,
+            "iterations": iterations,
+            "distance_thresh": distance_thresh,
+            "F1": metrics['F1'],
+            "IoU": metrics['IoU'],
+            "Precision": metrics['Precision'],
+            "Recall": metrics['Recall']
+        })
+        
+        # Progress update
+        if test_count % 100 == 0:
+            print(f"  Progress: {test_count}/{total_combinations} ({test_count/total_combinations*100:.1f}%)")
+    
+    print(f"  ✓ Completed: {total_combinations} combinations tested")
+    
+    # Convert to DataFrame
+    df_results = pd.DataFrame(results)
+    
+    # =====================================================================
+    # ANALYSIS
+    # =====================================================================
+    
+    print("\n" + "="*80)
+    print("RESULTS ANALYSIS")
+    print("="*80)
+    
+    # Top 10 configurations
+    top_10 = df_results.nlargest(10, 'F1')
+    print("\n🏆 TOP 10 CONFIGURATIONS (by F1 Score):")
+    print("-" * 100)
+    for idx, row in top_10.iterrows():
+        rank = top_10.index.get_loc(idx) + 1
+        print(f"  Rank {rank:2d}: "
+              f"percentile={int(row['percentile']):2d}, "
+              f"min_area={int(row['min_area']):3d}, "
+              f"kernel={int(row['kernel_size']):2d}, "
+              f"iter={int(row['iterations']):1d}, "
+              f"dist={int(row['distance_thresh']):2d} → "
+              f"F1={row['F1']:.4f}, IoU={row['IoU']:.4f}, "
+              f"Prec={row['Precision']:.4f}, Rec={row['Recall']:.4f}")
+    
+    # Best configuration
+    best_idx = df_results['F1'].idxmax()
+    best_config = df_results.loc[best_idx]
+    
+    print(f"\n{'='*80}")
+    print(f"🥇 BEST CONFIGURATION FOR {class_name.upper()}:")
+    print(f"{'='*80}")
+    print(f"  Percentile:      {int(best_config['percentile'])}%")
+    print(f"  Threshold High:  {best_config['threshold_high']:.4f}")
+    print(f"  Threshold Low:   {threshold_low:.4f} (Otsu)")
+    print(f"  Min Area:        {int(best_config['min_area'])} pixels")
+    print(f"  Kernel Size:     {int(best_config['kernel_size'])}×{int(best_config['kernel_size'])}")
+    print(f"  Iterations:      {int(best_config['iterations'])}")
+    print(f"  Distance Thresh: {int(best_config['distance_thresh'])} pixels")
+    print(f"\n  F1 Score:        {best_config['F1']:.4f}")
+    print(f"  IoU:             {best_config['IoU']:.4f}")
+    print(f"  Precision:       {best_config['Precision']:.4f}")
+    print(f"  Recall:          {best_config['Recall']:.4f}")
+    
+    # Save to summary
+    all_class_results.append({
+        "class": class_name,
+        "percentile": int(best_config['percentile']),
+        "threshold_high": best_config['threshold_high'],
+        "threshold_low": threshold_low,
+        "min_area": int(best_config['min_area']),
+        "kernel_size": int(best_config['kernel_size']),
+        "iterations": int(best_config['iterations']),
+        "distance_thresh": int(best_config['distance_thresh']),
+        "F1": best_config['F1'],
+        "IoU": best_config['IoU'],
+        "Precision": best_config['Precision'],
+        "Recall": best_config['Recall']
     })
     
-    # Progress
-    if test_count % 20 == 0:
-        print(f"  Progress: {test_count}/{total_combinations} tested...")
-
-print(f"  ✓ Completed: {total_combinations} combinations tested")
-
-# Converti in DataFrame
-df_results = pd.DataFrame(results)
-
-# =====================================================================
-# ANALYSIS & BEST CONFIGURATION
-# =====================================================================
-
-print("\n" + "="*70)
-print("RESULTS ANALYSIS")
-print("="*70)
-
-# Top 10 configurazioni per F1
-print("\n🏆 TOP 10 CONFIGURATIONS (by F1 Score):")
-print("-" * 70)
-
-top_10 = df_results.nlargest(10, 'F1')
-for idx, row in top_10.iterrows():
-    print(f"  Rank {top_10.index.get_loc(idx) + 1}: "
-          f"min_area={int(row['min_area']):3d}, kernel_size={int(row['kernel_size']):2d}, "
-          f"iterations={int(row['iterations']):1d} → "
-          f"F1={row['F1']:.4f}, IoU={row['IoU']:.4f}, "
-          f"Prec={row['Precision']:.4f}, Rec={row['Recall']:.4f}")
-
-# Best configuration
-best_idx = df_results['F1'].idxmax()
-best_config = df_results.loc[best_idx]
-
-print(f"\n{'='*70}")
-print(f"🥇 BEST CONFIGURATION:")
-print(f"{'='*70}")
-print(f"  min_area:    {int(best_config['min_area'])}")
-print(f"  kernel_size: {int(best_config['kernel_size'])}")
-print(f"  iterations:  {int(best_config['iterations'])}")
-print(f"\n  F1 Score:    {best_config['F1']:.4f}")
-print(f"  IoU:         {best_config['IoU']:.4f}")
-print(f"  Precision:   {best_config['Precision']:.4f}")
-print(f"  Recall:      {best_config['Recall']:.4f}")
-
-# Improvement vs no post-processing
-improvement = best_config['F1'] - metrics_no_postproc['F1']
-print(f"\n  Improvement vs NO post-proc: {improvement:+.4f} ({improvement/metrics_no_postproc['F1']*100:+.1f}%)")
-
-# =====================================================================
-# ANALYSIS: Impact of Each Parameter
-# =====================================================================
-
-print("\n" + "="*70)
-print("PARAMETER IMPACT ANALYSIS")
-print("="*70)
-
-# 1. Min Area Impact (fixing other params)
-print("\n[1] MIN_AREA Impact (kernel_size=5, iterations=1):")
-subset = df_results[(df_results['kernel_size'] == 5) & (df_results['iterations'] == 1)]
-subset_sorted = subset.sort_values('min_area')
-print("\n  min_area  |   F1   |  IoU   |  Prec  |  Rec")
-print("  " + "-" * 50)
-for _, row in subset_sorted.iterrows():
-    marker = " ⭐" if row['F1'] == subset['F1'].max() else ""
-    print(f"  {int(row['min_area']):5d}     | {row['F1']:.4f} | {row['IoU']:.4f} | "
-          f"{row['Precision']:.4f} | {row['Recall']:.4f}{marker}")
-
-# 2. Kernel Size Impact
-print("\n[2] KERNEL_SIZE Impact (min_area=50, iterations=1):")
-subset = df_results[(df_results['min_area'] == 50) & (df_results['iterations'] == 1)]
-subset_sorted = subset.sort_values('kernel_size')
-print("\n  kernel  |   F1   |  IoU   |  Prec  |  Rec")
-print("  " + "-" * 50)
-for _, row in subset_sorted.iterrows():
-    marker = " ⭐" if row['F1'] == subset['F1'].max() else ""
-    print(f"  {int(row['kernel_size']):5d}   | {row['F1']:.4f} | {row['IoU']:.4f} | "
-          f"{row['Precision']:.4f} | {row['Recall']:.4f}{marker}")
-
-# 3. Iterations Impact
-print("\n[3] ITERATIONS Impact (min_area=50, kernel_size=5):")
-subset = df_results[(df_results['min_area'] == 50) & (df_results['kernel_size'] == 5)]
-subset_sorted = subset.sort_values('iterations')
-print("\n  iters  |   F1   |  IoU   |  Prec  |  Rec")
-print("  " + "-" * 50)
-for _, row in subset_sorted.iterrows():
-    marker = " ⭐" if row['F1'] == subset['F1'].max() else ""
-    print(f"  {int(row['iterations']):5d}  | {row['F1']:.4f} | {row['IoU']:.4f} | "
-          f"{row['Precision']:.4f} | {row['Recall']:.4f}{marker}")
-
-# =====================================================================
-# ADDITIONAL OPTIMIZATION: Distance Threshold
-# =====================================================================
-
-print("\n" + "="*70)
-print("BONUS: Distance Threshold Optimization")
-print("="*70)
-
-print("\n[4] Testing distance_thresh parameter (for Weighted Union)...")
-
-distance_thresholds = [3, 4, 5, 6, 7, 8, 10]
-distance_results = []
-
-for dist_thresh in distance_thresholds:
-    # Generate mask with this distance threshold
-    mask_raw = weighted_union_threshold(anomaly_map_norm, threshold_high, threshold_low, 
-                                       distance_thresh=dist_thresh)
+    # =====================================================================
+    # SAVE RESULTS
+    # =====================================================================
     
-    # Apply best post-processing found
-    mask_postproc = post_process_mask(mask_raw, 
-                                     min_area=int(best_config['min_area']),
-                                     kernel_size=int(best_config['kernel_size']),
-                                     iterations=int(best_config['iterations']))
+    class_output_dir = os.path.join(OUTPUT_DIR, class_name)
+    os.makedirs(class_output_dir, exist_ok=True)
     
-    metrics = compute_metrics(mask_postproc, gt_binary)
+    # Save full results
+    df_results.to_csv(os.path.join(class_output_dir, "full_grid_results.csv"), index=False)
     
-    distance_results.append({
-        "distance_thresh": dist_thresh,
-        "F1": metrics['F1'],
-        "IoU": metrics['IoU'],
-        "Precision": metrics['Precision'],
-        "Recall": metrics['Recall']
-    })
-
-df_distance = pd.DataFrame(distance_results)
-
-print("\n  distance |   F1   |  IoU   |  Prec  |  Rec")
-print("  " + "-" * 50)
-for _, row in df_distance.iterrows():
-    marker = " ⭐" if row['F1'] == df_distance['F1'].max() else ""
-    print(f"  {int(row['distance_thresh']):5d}    | {row['F1']:.4f} | {row['IoU']:.4f} | "
-          f"{row['Precision']:.4f} | {row['Recall']:.4f}{marker}")
-
-best_distance = df_distance.loc[df_distance['F1'].idxmax()]
-
-print(f"\n🎯 OPTIMAL DISTANCE THRESHOLD: {int(best_distance['distance_thresh'])} pixels")
-print(f"   F1: {best_distance['F1']:.4f}")
+    # Save top 50 for analysis
+    df_results.nlargest(50, 'F1').to_csv(os.path.join(class_output_dir, "top50_configs.csv"), index=False)
+    
+    # =====================================================================
+    # PARAMETER IMPACT ANALYSIS
+    # =====================================================================
+    
+    print("\n" + "-"*80)
+    print("PARAMETER IMPACT ANALYSIS")
+    print("-"*80)
+    
+    # Group by each parameter
+    print("\n[1] PERCENTILE Impact (averaged over other params):")
+    percentile_impact = df_results.groupby('percentile')['F1'].agg(['mean', 'std', 'max'])
+    print(percentile_impact.to_string())
+    
+    print("\n[2] MIN_AREA Impact:")
+    min_area_impact = df_results.groupby('min_area')['F1'].agg(['mean', 'std', 'max'])
+    print(min_area_impact.to_string())
+    
+    print("\n[3] KERNEL_SIZE Impact:")
+    kernel_impact = df_results.groupby('kernel_size')['F1'].agg(['mean', 'std', 'max'])
+    print(kernel_impact.to_string())
+    
+    print("\n[4] DISTANCE_THRESH Impact:")
+    distance_impact = df_results.groupby('distance_thresh')['F1'].agg(['mean', 'std', 'max'])
+    print(distance_impact.to_string())
+    
+    # =====================================================================
+    # VISUALIZATION
+    # =====================================================================
+    
+    print("\n[VISUALIZATION] Creating plots...")
+    
+    # 1. Parameter impact plots
+    fig, axes = plt.subplots(2, 2, figsize=(16, 12))
+    
+    axes[0, 0].plot(percentile_impact.index, percentile_impact['mean'], 'o-', linewidth=2, markersize=8)
+    axes[0, 0].fill_between(percentile_impact.index, 
+                            percentile_impact['mean'] - percentile_impact['std'],
+                            percentile_impact['mean'] + percentile_impact['std'], 
+                            alpha=0.3)
+    axes[0, 0].axvline(x=best_config['percentile'], color='red', linestyle='--', linewidth=2)
+    axes[0, 0].set_xlabel('Percentile', fontsize=12, fontweight='bold')
+    axes[0, 0].set_ylabel('F1 Score (mean)', fontsize=12, fontweight='bold')
+    axes[0, 0].set_title(f'{class_name.upper()} - Percentile Impact', fontsize=14, fontweight='bold')
+    axes[0, 0].grid(True, alpha=0.3)
+    
+    axes[0, 1].plot(min_area_impact.index, min_area_impact['mean'], 'o-', linewidth=2, markersize=8)
+    axes[0, 1].fill_between(min_area_impact.index, 
+                            min_area_impact['mean'] - min_area_impact['std'],
+                            min_area_impact['mean'] + min_area_impact['std'], 
+                            alpha=0.3)
+    axes[0, 1].axvline(x=best_config['min_area'], color='red', linestyle='--', linewidth=2)
+    axes[0, 1].set_xlabel('Min Area (pixels)', fontsize=12, fontweight='bold')
+    axes[0, 1].set_ylabel('F1 Score (mean)', fontsize=12, fontweight='bold')
+    axes[0, 1].set_title(f'{class_name.upper()} - Min Area Impact', fontsize=14, fontweight='bold')
+    axes[0, 1].grid(True, alpha=0.3)
+    
+    axes[1, 0].plot(kernel_impact.index, kernel_impact['mean'], 'o-', linewidth=2, markersize=8)
+    axes[1, 0].fill_between(kernel_impact.index, 
+                            kernel_impact['mean'] - kernel_impact['std'],
+                            kernel_impact['mean'] + kernel_impact['std'], 
+                            alpha=0.3)
+    axes[1, 0].axvline(x=best_config['kernel_size'], color='red', linestyle='--', linewidth=2)
+    axes[1, 0].set_xlabel('Kernel Size', fontsize=12, fontweight='bold')
+    axes[1, 0].set_ylabel('F1 Score (mean)', fontsize=12, fontweight='bold')
+    axes[1, 0].set_title(f'{class_name.upper()} - Kernel Size Impact', fontsize=14, fontweight='bold')
+    axes[1, 0].grid(True, alpha=0.3)
+    
+    axes[1, 1].plot(distance_impact.index, distance_impact['mean'], 'o-', linewidth=2, markersize=8)
+    axes[1, 1].fill_between(distance_impact.index, 
+                            distance_impact['mean'] - distance_impact['std'],
+                            distance_impact['mean'] + distance_impact['std'], 
+                            alpha=0.3)
+    axes[1, 1].axvline(x=best_config['distance_thresh'], color='red', linestyle='--', linewidth=2)
+    axes[1, 1].set_xlabel('Distance Threshold (pixels)', fontsize=12, fontweight='bold')
+    axes[1, 1].set_ylabel('F1 Score (mean)', fontsize=12, fontweight='bold')
+    axes[1, 1].set_title(f'{class_name.upper()} - Distance Impact', fontsize=14, fontweight='bold')
+    axes[1, 1].grid(True, alpha=0.3)
+    
+    plt.tight_layout()
+    plt.savefig(os.path.join(class_output_dir, "parameter_impact.png"), dpi=150, bbox_inches='tight')
+    plt.close()
+    
+    # 2. Best configuration visualization
+    threshold_high = best_config['threshold_high']
+    
+    best_mask_raw = weighted_union_threshold(anomaly_map_norm, threshold_high, threshold_low, 
+                                            distance_thresh=int(best_config['distance_thresh']))
+    best_mask_final = post_process_mask(best_mask_raw,
+                                       min_area=int(best_config['min_area']),
+                                       kernel_size=int(best_config['kernel_size']),
+                                       iterations=int(best_config['iterations']))
+    
+    fig, axs = plt.subplots(2, 3, figsize=(18, 12))
+    fig.suptitle(f'{class_name.upper()} - Optimal Configuration ({ANOMALY_METHOD.upper()})', 
+                 fontsize=16, fontweight='bold')
+    
+    axs[0, 0].imshow(img_tensor[0].permute(1, 2, 0).cpu().numpy())
+    axs[0, 0].set_title("Original", fontsize=12, fontweight='bold')
+    axs[0, 0].axis('off')
+    
+    axs[0, 1].imshow(anomaly_map_norm, cmap='hot')
+    axs[0, 1].set_title(f"Anomaly Map ({ANOMALY_METHOD})", fontsize=12, fontweight='bold')
+    axs[0, 1].axis('off')
+    
+    axs[0, 2].imshow(best_mask_raw, cmap='gray')
+    axs[0, 2].set_title("Raw Mask", fontsize=12, fontweight='bold')
+    axs[0, 2].axis('off')
+    
+    axs[1, 0].imshow(gt_binary, cmap='gray')
+    axs[1, 0].set_title("Ground Truth", fontsize=12, fontweight='bold')
+    axs[1, 0].axis('off')
+    
+    axs[1, 1].imshow(best_mask_final, cmap='gray')
+    axs[1, 1].set_title(f"Optimized Mask\nF1={best_config['F1']:.4f}", 
+                       fontsize=12, fontweight='bold', color='darkgreen')
+    axs[1, 1].axis('off')
+    
+    def create_overlay(pred_mask, gt_mask):
+        pred = pred_mask.astype(bool)
+        gt = gt_mask.astype(bool)
+        overlay = np.zeros((gt.shape[0], gt.shape[1], 3))
+        overlay[np.logical_and(pred, gt)] = [0, 1, 0]
+        overlay[np.logical_and(pred, ~gt)] = [1, 0, 0]
+        overlay[np.logical_and(~pred, gt)] = [0, 0, 1]
+        return overlay
+    
+    overlay = create_overlay(best_mask_final, gt_binary)
+    axs[1, 2].imshow(overlay)
+    axs[1, 2].set_title(f"Overlay (TP=green, FP=red, FN=blue)\nPrec={best_config['Precision']:.3f} | Rec={best_config['Recall']:.3f}", 
+                       fontsize=12, fontweight='bold')
+    axs[1, 2].axis('off')
+    
+    plt.tight_layout()
+    plt.savefig(os.path.join(class_output_dir, "optimal_config_visual.png"), dpi=150, bbox_inches='tight')
+    plt.close()
 
 # =====================================================================
-# FINAL OPTIMAL CONFIGURATION
+# SUMMARY ACROSS ALL CLASSES
 # =====================================================================
 
-print("\n" + "="*70)
-print("🏆 FINAL OPTIMAL CONFIGURATION")
-print("="*70)
+print("\n" + "="*80)
+print("SUMMARY: OPTIMAL CONFIGURATIONS PER CLASS")
+print("="*80)
 
-print(f"""
-POST-PROCESSING PARAMETERS:
-  min_area:        {int(best_config['min_area'])} pixels
-  kernel_size:     {int(best_config['kernel_size'])}×{int(best_config['kernel_size'])}
-  iterations:      {int(best_config['iterations'])}
+df_summary = pd.DataFrame(all_class_results)
 
-WEIGHTED UNION PARAMETER:
-  distance_thresh: {int(best_distance['distance_thresh'])} pixels
+print("\n" + df_summary.to_string(index=False))
 
-THRESHOLDING:
-  high_threshold:  {threshold_high:.4f} (p97)
-  low_threshold:   {threshold_low:.4f} (Otsu)
+df_summary.to_csv(os.path.join(OUTPUT_DIR, "summary_all_classes.csv"), index=False)
 
-FINAL PERFORMANCE:
-  F1 Score:        {best_distance['F1']:.4f}
-  IoU:             {best_distance['IoU']:.4f}
-  Precision:       {best_distance['Precision']:.4f}
-  Recall:          {best_distance['Recall']:.4f}
+# Comparison visualization
+fig, axes = plt.subplots(2, 3, figsize=(18, 12))
 
-IMPROVEMENT vs BASELINE (no post-proc):
-  F1:     {best_distance['F1'] - metrics_no_postproc['F1']:+.4f} ({(best_distance['F1'] / metrics_no_postproc['F1'] - 1)*100:+.1f}%)
-  Prec:   {best_distance['Precision'] - metrics_no_postproc['Precision']:+.4f}
-  Rec:    {best_distance['Recall'] - metrics_no_postproc['Recall']:+.4f}
-""")
+axes[0, 0].bar(df_summary['class'], df_summary['F1'], color=['#2ecc71', '#3498db', '#e74c3c'])
+axes[0, 0].set_title('F1 Score per Class', fontsize=14, fontweight='bold')
+axes[0, 0].set_ylabel('F1 Score', fontsize=12)
+axes[0, 0].grid(True, alpha=0.3, axis='y')
 
-# =====================================================================
-# VISUALIZATION
-# =====================================================================
+axes[0, 1].bar(df_summary['class'], df_summary['IoU'], color=['#2ecc71', '#3498db', '#e74c3c'])
+axes[0, 1].set_title('IoU per Class', fontsize=14, fontweight='bold')
+axes[0, 1].set_ylabel('IoU', fontsize=12)
+axes[0, 1].grid(True, alpha=0.3, axis='y')
 
-print("\n[VISUALIZATION] Creating heatmaps and plots...")
+axes[0, 2].bar(df_summary['class'], df_summary['percentile'], color=['#2ecc71', '#3498db', '#e74c3c'])
+axes[0, 2].set_title('Best Percentile per Class', fontsize=14, fontweight='bold')
+axes[0, 2].set_ylabel('Percentile', fontsize=12)
+axes[0, 2].grid(True, alpha=0.3, axis='y')
 
-# Plot 1: Heatmap F1 vs min_area and kernel_size (iterations=1)
-fig, axes = plt.subplots(1, 2, figsize=(18, 7))
+axes[1, 0].bar(df_summary['class'], df_summary['min_area'], color=['#2ecc71', '#3498db', '#e74c3c'])
+axes[1, 0].set_title('Best Min Area per Class', fontsize=14, fontweight='bold')
+axes[1, 0].set_ylabel('Min Area (pixels)', fontsize=12)
+axes[1, 0].grid(True, alpha=0.3, axis='y')
 
-for iter_val, ax in zip([1, 2], axes):
-    subset = df_results[df_results['iterations'] == iter_val]
-    pivot = subset.pivot(index='min_area', columns='kernel_size', values='F1')
-    
-    sns.heatmap(pivot, annot=True, fmt='.3f', cmap='RdYlGn', vmin=0.80, vmax=0.90,
-                cbar_kws={'label': 'F1 Score'}, ax=ax, linewidths=0.5)
-    
-    ax.set_title(f'F1 Score Heatmap (iterations={iter_val})', fontsize=14, fontweight='bold')
-    ax.set_xlabel('Kernel Size', fontsize=12, fontweight='bold')
-    ax.set_ylabel('Min Area', fontsize=12, fontweight='bold')
+axes[1, 1].bar(df_summary['class'], df_summary['kernel_size'], color=['#2ecc71', '#3498db', '#e74c3c'])
+axes[1, 1].set_title('Best Kernel Size per Class', fontsize=14, fontweight='bold')
+axes[1, 1].set_ylabel('Kernel Size', fontsize=12)
+axes[1, 1].grid(True, alpha=0.3, axis='y')
+
+axes[1, 2].bar(df_summary['class'], df_summary['distance_thresh'], color=['#2ecc71', '#3498db', '#e74c3c'])
+axes[1, 2].set_title('Best Distance Threshold per Class', fontsize=14, fontweight='bold')
+axes[1, 2].set_ylabel('Distance (pixels)', fontsize=12)
+axes[1, 2].grid(True, alpha=0.3, axis='y')
 
 plt.tight_layout()
-plt.savefig(os.path.join(OUTPUT_DIR, "01_hyperparameter_heatmap.png"), dpi=150, bbox_inches='tight')
+plt.savefig(os.path.join(OUTPUT_DIR, "comparison_all_classes.png"), dpi=150, bbox_inches='tight')
 plt.close()
 
-# Plot 2: Line plots per parameter
-fig, axes = plt.subplots(1, 3, figsize=(18, 5))
-
-# Min Area
-subset = df_results[(df_results['kernel_size'] == 5) & (df_results['iterations'] == 1)]
-axes[0].plot(subset['min_area'], subset['F1'], 'o-', linewidth=2, markersize=8, color='blue')
-axes[0].axvline(x=best_config['min_area'], color='red', linestyle='--', linewidth=2, 
-                label=f"Best: {int(best_config['min_area'])}")
-axes[0].set_xlabel('Min Area (pixels)', fontsize=12, fontweight='bold')
-axes[0].set_ylabel('F1 Score', fontsize=12, fontweight='bold')
-axes[0].set_title('Min Area Impact', fontsize=14, fontweight='bold')
-axes[0].grid(True, alpha=0.3)
-axes[0].legend()
-
-# Kernel Size
-subset = df_results[(df_results['min_area'] == 50) & (df_results['iterations'] == 1)]
-axes[1].plot(subset['kernel_size'], subset['F1'], 'o-', linewidth=2, markersize=8, color='green')
-axes[1].axvline(x=best_config['kernel_size'], color='red', linestyle='--', linewidth=2,
-                label=f"Best: {int(best_config['kernel_size'])}")
-axes[1].set_xlabel('Kernel Size', fontsize=12, fontweight='bold')
-axes[1].set_ylabel('F1 Score', fontsize=12, fontweight='bold')
-axes[1].set_title('Kernel Size Impact', fontsize=14, fontweight='bold')
-axes[1].grid(True, alpha=0.3)
-axes[1].legend()
-
-# Distance Threshold
-axes[2].plot(df_distance['distance_thresh'], df_distance['F1'], 'o-', linewidth=2, markersize=8, color='purple')
-axes[2].axvline(x=best_distance['distance_thresh'], color='red', linestyle='--', linewidth=2,
-                label=f"Best: {int(best_distance['distance_thresh'])}")
-axes[2].set_xlabel('Distance Threshold (pixels)', fontsize=12, fontweight='bold')
-axes[2].set_ylabel('F1 Score', fontsize=12, fontweight='bold')
-axes[2].set_title('Distance Threshold Impact', fontsize=14, fontweight='bold')
-axes[2].grid(True, alpha=0.3)
-axes[2].legend()
-
-plt.tight_layout()
-plt.savefig(os.path.join(OUTPUT_DIR, "02_parameter_impact.png"), dpi=150, bbox_inches='tight')
-plt.close()
-
-# Plot 3: Comparison raw vs best post-processing
-best_mask_raw = weighted_union_threshold(anomaly_map_norm, threshold_high, threshold_low, 
-                                        distance_thresh=int(best_distance['distance_thresh']))
-best_mask_postproc = post_process_mask(best_mask_raw,
-                                      min_area=int(best_config['min_area']),
-                                      kernel_size=int(best_config['kernel_size']),
-                                      iterations=int(best_config['iterations']))
-
-def create_overlay(pred_mask, gt_mask):
-    pred = pred_mask.astype(bool)
-    gt = gt_mask.astype(bool)
-    
-    tp = np.logical_and(pred, gt)
-    fp = np.logical_and(pred, ~gt)
-    fn = np.logical_and(~pred, gt)
-    
-    overlay = np.zeros((gt.shape[0], gt.shape[1], 3))
-    overlay[tp] = [0, 1, 0]
-    overlay[fp] = [1, 0, 0]
-    overlay[fn] = [0, 0, 1]
-    
-    return overlay
-
-overlay_raw = create_overlay(best_mask_raw, gt_binary)
-overlay_postproc = create_overlay(best_mask_postproc, gt_binary)
-metrics_best_raw = compute_metrics(best_mask_raw, gt_binary)
-metrics_best_postproc = compute_metrics(best_mask_postproc, gt_binary)
-
-fig, axs = plt.subplots(2, 3, figsize=(18, 12))
-fig.suptitle('Optimal Configuration: Before vs After Post-Processing', fontsize=16, fontweight='bold')
-
-# Row 1: Raw
-axs[0, 0].imshow(original.permute(1, 2, 0).cpu().numpy())
-axs[0, 0].set_title("Original", fontsize=12, fontweight='bold')
-axs[0, 0].axis('off')
-
-axs[0, 1].imshow(best_mask_raw, cmap='gray')
-axs[0, 1].set_title(f"Raw Mask (NO post-proc)\nF1={metrics_best_raw['F1']:.4f}", 
-                   fontsize=12, fontweight='bold')
-axs[0, 1].axis('off')
-
-axs[0, 2].imshow(overlay_raw)
-axs[0, 2].set_title(f"Raw Overlay\nPrec={metrics_best_raw['Precision']:.3f} | Rec={metrics_best_raw['Recall']:.3f}",
-                   fontsize=12, fontweight='bold')
-axs[0, 2].axis('off')
-
-# Row 2: Post-processed
-axs[1, 0].imshow(gt_binary, cmap='gray')
-axs[1, 0].set_title("Ground Truth", fontsize=12, fontweight='bold')
-axs[1, 0].axis('off')
-
-axs[1, 1].imshow(best_mask_postproc, cmap='gray')
-axs[1, 1].set_title(f"Optimized Post-proc\nF1={metrics_best_postproc['F1']:.4f} ({metrics_best_postproc['F1']-metrics_best_raw['F1']:+.4f})",
-                   fontsize=12, fontweight='bold', color='darkgreen')
-axs[1, 1].axis('off')
-
-axs[1, 2].imshow(overlay_postproc)
-axs[1, 2].set_title(f"Optimized Overlay\nPrec={metrics_best_postproc['Precision']:.3f} | Rec={metrics_best_postproc['Recall']:.3f}",
-                   fontsize=12, fontweight='bold', color='darkgreen')
-axs[1, 2].axis('off')
-
-plt.tight_layout()
-plt.savefig(os.path.join(OUTPUT_DIR, "03_optimal_configuration.png"), dpi=150, bbox_inches='tight')
-plt.close()
-
-# Save results to CSV
-df_results.to_csv(os.path.join(OUTPUT_DIR, "hyperparameter_results.csv"), index=False)
-df_distance.to_csv(os.path.join(OUTPUT_DIR, "distance_threshold_results.csv"), index=False)
-
-print(f"\n{'='*70}")
-print(f"✓ Hyperparameter optimization completed!")
+print(f"\n{'='*80}")
+print(f"✓ Full grid search optimization completed!")
+print(f"✓ Total combinations tested per class: {total_combinations}")
 print(f"✓ Results saved in '{OUTPUT_DIR}'")
-print(f"✓ CSV files saved for further analysis")
-print(f"{'='*70}\n")
+print(f"{'='*80}\n")

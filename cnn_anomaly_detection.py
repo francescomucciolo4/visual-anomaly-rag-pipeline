@@ -1,57 +1,88 @@
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 
-class CAE256_Latent100(nn.Module):
+
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+
+
+class CAE256_FC_Latent32(nn.Module):
     def __init__(self):
-        super(CAE256_Latent100, self).__init__()
-        
-        # ---- Encoder convoluzionale ----
-        self.encoder_conv = nn.Sequential(
-            nn.Conv2d(3, 16, 3, stride=2, padding=1),    # 256x256 -> 128x128
-            nn.ReLU(),
-            nn.Conv2d(16, 32, 3, stride=2, padding=1),   # 128x128 -> 64x64
-            nn.ReLU(),
-            nn.Conv2d(32, 64, 3, stride=2, padding=1),   # 64x64 -> 32x32
-            nn.ReLU(),
-            nn.Conv2d(64, 128, 3, stride=2, padding=1),  # 32x32 -> 16x16
-            nn.ReLU(),
-            nn.Conv2d(128, 256, 3, stride=2, padding=1), # 16x16 -> 4x4
-            nn.ReLU()
+        super(CAE256_FC_Latent32, self).__init__()
+
+        self.encoder = nn.Sequential(
+            nn.Conv2d(3, 32, kernel_size=4, stride=2, padding=1),
+            nn.InstanceNorm2d(32),
+            nn.LeakyReLU(0.2, inplace=True),
+
+            nn.Conv2d(32, 64, kernel_size=4, stride=2, padding=1),
+            nn.InstanceNorm2d(64),
+            nn.LeakyReLU(0.2, inplace=True),
+
+            nn.Conv2d(64, 128, kernel_size=4, stride=2, padding=1),
+            nn.InstanceNorm2d(128),
+            nn.LeakyReLU(0.2, inplace=True),
+
+            nn.Conv2d(128, 256, kernel_size=4, stride=2, padding=1),
+            nn.InstanceNorm2d(256),
+            nn.LeakyReLU(0.2, inplace=True),
         )
-        
-       # Flatten per passare a Linear
-        self.flatten = nn.Flatten()
-        self.fc_enc = nn.Linear(256*8*8, 100)  # 16384 -> 100
 
-        # ---- Decoder ----
-        self.fc_dec = nn.Linear(100, 256*8*8)  # 100 -> 16384
-        self.unflatten = nn.Unflatten(1, (256, 8, 8))  # ritorna a [256, 8, 8]
-        
-        self.decoder_conv = nn.Sequential(
-        nn.ConvTranspose2d(256, 128, kernel_size=3, stride=2, padding=1, output_padding=1),  # 8 → 16
-        nn.ReLU(),
+        self.bottleneck = nn.Sequential(
+            nn.Conv2d(256, 32, kernel_size=1),
+            nn.LeakyReLU(0.2, inplace=True),
+            nn.Conv2d(32, 256, kernel_size=1),
+            nn.LeakyReLU(0.2, inplace=True),
+        )
 
-        nn.ConvTranspose2d(128, 64, kernel_size=3, stride=2, padding=1, output_padding=1),   # 16 → 32
-        nn.ReLU(),
+        self.decoder = nn.Sequential(
+            nn.Upsample(scale_factor=2, mode='bilinear', align_corners=False),
+            nn.Conv2d(256, 128, kernel_size=3, padding=1),
+            nn.InstanceNorm2d(128),
+            nn.ReLU(inplace=True),
 
-        nn.ConvTranspose2d(64, 32, kernel_size=3, stride=2, padding=1, output_padding=1),    # 32 → 64
-        nn.ReLU(),
+            nn.Upsample(scale_factor=2, mode='bilinear', align_corners=False),
+            nn.Conv2d(128, 64, kernel_size=3, padding=1),
+            nn.InstanceNorm2d(64),
+            nn.ReLU(inplace=True),
 
-        nn.ConvTranspose2d(32, 16, kernel_size=3, stride=2, padding=1, output_padding=1),    # 64 → 128
-        nn.ReLU(),
+            nn.Upsample(scale_factor=2, mode='bilinear', align_corners=False),
+            nn.Conv2d(64, 32, kernel_size=3, padding=1),
+            nn.InstanceNorm2d(32),
+            nn.ReLU(inplace=True),
 
-        nn.ConvTranspose2d(16, 3, kernel_size=3, stride=2, padding=1, output_padding=1),     # 128 → 256
-        nn.Sigmoid()
-    )
-        
+            nn.Upsample(scale_factor=2, mode='bilinear', align_corners=False),
+            nn.Conv2d(32, 3, kernel_size=3, padding=1),
+
+            nn.Sigmoid()
+        )
+
     def forward(self, x):
-        # Encoder
-        x = self.encoder_conv(x)
-        x = self.flatten(x)
-        latent = self.fc_enc(x)  # vettore latente di dimensione 100
-        
-        # Decoder
-        x = self.fc_dec(latent)
-        x = self.unflatten(x)
-        x = self.decoder_conv(x)
+        x = self.encoder(x)
+        x = self.bottleneck(x)
+        x = self.decoder(x)
         return x
+
+'''BatchNorm usa le statistiche globali apprese dalle immagini buone e tende a “normalizzare”
+anche le anomalie in fase di test, riducendo il contrasto tra normale e difettoso, mentre InstanceNorm lavora 
+per singola immagine e preserva meglio le deviazioni locali utili per rilevare anomalie.
+
+
+Con ReLU, i valori negativi vengono azzerati, quindi il gradiente è nullo per x < 0 
+e il neurone può smettere di aggiornarsi (dead neuron).
+Con LeakyReLU, invece, i valori negativi vengono moltiplicati per un piccolo coefficiente (es. 0.2)
+e quindi il gradiente rimane diverso da zero, preservando l’informazione.
+
+ConvTranspose aumenta la dimensione inserendo zeri e applicando una convoluzione, ma la sovrapposizione
+non uniforme del kernel può creare squilibri (checkerboard artifacts); l’upsampling invece interpola prima i 
+in modo uniforme e solo dopo applica una convoluzione standard, producendo ricostruzioni più stabili.
+
+Per image-level detection basta un bottleneck linear perché serve solo un vettore globale (perde dettagli), mentre fully convolutional 
+è più adatto se vuoi anche heatmap o dettagli locali.
+
+Nel decoder si usa ReLU perché vogliamo produrre valori positivi stabili per la ricostruzione, mentre LeakyReLU 
+servirebbe solo a preservare gradienti negativi che qui non sono utili.
+
+'''
