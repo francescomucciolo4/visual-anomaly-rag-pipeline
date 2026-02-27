@@ -1,6 +1,6 @@
 import torch
 import torch.nn.functional as F
-from cnn_anomaly_detection import CAE256_FC_Latent32
+from cae_anomaly_detection import CAE256_FC_Latent32
 from dataset_anomaly_detection import val_transforms
 from training_anomaly_detection import SSIMLoss
 import matplotlib.pyplot as plt
@@ -83,7 +83,7 @@ model = CAE256_FC_Latent32().to(device)
 model.load_state_dict(torch.load(MODEL_PATH, map_location=device))
 model.eval()
 
-# Configurazione globale unica (best compromise)
+
 GLOBAL_CONFIG = {
     'percentile': 96,
     'min_area': 50,

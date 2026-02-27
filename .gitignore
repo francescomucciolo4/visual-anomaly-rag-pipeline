@@ -12,10 +12,6 @@ __pycache__/
 
 # Dataset (non caricare MVTec!)
 bottle/
-data/
-inference_results_anomalies/
-inference_results_good/
-inference_ssim_results/
 
 
 # VS Code

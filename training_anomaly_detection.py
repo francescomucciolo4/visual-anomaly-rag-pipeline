@@ -160,7 +160,7 @@ def train_autoencoder(model, train_loader, val_loader, device='cuda',
 
 
 if __name__ == "__main__":
-    from cnn_anomaly_detection import CAE256_FC_Latent32
+    from cae_anomaly_detection import CAE256_FC_Latent32
     from dataset_anomaly_detection import train_loader, val_loader
 
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
