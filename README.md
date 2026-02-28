@@ -1,5 +1,5 @@
 # Anomaly Detection con Autoencoder Convoluzionale sul MVTec Anomaly Detection dataset - Categoria "bottle"
-In questo progetto viene mostrata l'implementazione di sistema di rilevamento anomalie a livello immagine utilizzando un Convolutional Autoencoder (CAE) syl dataset MVTec Anomaly Detection dataset, in particolare sulla categoria "Bottle".
+In questo progetto viene mostrata l'implementazione di sistema di rilevamento anomalie a livello immagine utilizzando un Convolutional Autoencoder (CAE) sul dataset MVTec Anomaly Detection dataset, in particolare sulla categoria "Bottle".
 L'obiettivo è identificare difetti su bottiglie confrontando l'immagine originale e quella generata dal modello a partire dall'originale, calcolando un punteggio di anomalia basato sull'errore di ricostruzione.
 
 ## Dataset
