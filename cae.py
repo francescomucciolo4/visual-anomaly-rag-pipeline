@@ -3,11 +3,6 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
-
-
 class CAE256_FC_Latent32(nn.Module):
     def __init__(self):
         super(CAE256_FC_Latent32, self).__init__()
