@@ -51,13 +51,7 @@ La fase di testing avviene sulle 83 immagini descritte in precedenza, contenenti
 - Pandas
 
 
-## Risultati
-IMAGE-LEVEL DETECTION RESULTS
-============================================================
-
-Model: best_autoencoder.pth
-Dataset: 20 good + 63 anomalies = 83 total
-
+## Risultati 
 ROC AUC:        0.8992
 Threshold:      0.0740
 
