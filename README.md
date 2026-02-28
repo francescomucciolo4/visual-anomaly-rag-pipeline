@@ -61,12 +61,6 @@ Dataset: 20 good + 63 anomalies = 83 total
 ROC AUC:        0.8992
 Threshold:      0.0740
 
-Confusion Matrix:
-                Predicted
-             Good  Anomaly
-Actual Good    20        0
-       Anom    19       44
-
 Accuracy Good:    100.0%
 Accuracy Anomaly: 69.8%
 Mean Accuracy:    84.9%
