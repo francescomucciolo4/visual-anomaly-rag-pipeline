@@ -58,7 +58,7 @@ class TransformableSubset(Dataset):
 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-ROOT_DIR = os.path.join(BASE_DIR, "data", "bottle", "train", "good")
+ROOT_DIR = os.path.join(BASE_DIR, "bottle", "train", "good")
 
 full_dataset = MVTecDataset(root_dir=ROOT_DIR)
 train_size = len(full_dataset) - 29
