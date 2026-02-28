@@ -68,3 +68,7 @@ Mean Accuracy:    84.9%
 Precision: 100.0%
 Recall:    69.8%
 F1 Score:  0.8224
+
+
+## NOTA
+Questo repository ha finalità esclusivamente illustrative e di portfolio personale.
