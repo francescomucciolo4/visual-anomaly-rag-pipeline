@@ -81,6 +81,7 @@ Il progetto utilizza la categoria **"Bottle"** del dataset **MVTec Anomaly Detec
 
 ---
 
-## Nota
+## Note
 
-> Questo repository ha finalità esclusivamente illustrative e di portfolio personale.
+> Questo repository ha finalità esclusivamente illustrative e di portfolio personale
+> Parte del codice è stato generato utilizzando Claude 
