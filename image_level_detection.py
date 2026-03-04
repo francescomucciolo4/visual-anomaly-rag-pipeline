@@ -12,7 +12,8 @@ from training import CombinedLoss
 
 
 MODEL_PATH = "best_autoencoder.pth"
-TEST_ROOT = r"C:\Users\Francesco\Desktop\Progetto personale\bottle\test"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+TEST_ROOT = os.path.join(BASE_DIR, "bottle", "test")
 OUTPUT_DIR = "detection_results"
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 

@@ -57,7 +57,8 @@ class TransformableSubset(Dataset):
         return len(self.subset)
 
 
-ROOT_DIR = r"C:\Users\Francesco\Desktop\Progetto personale\bottle\train\good"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+ROOT_DIR = os.path.join(BASE_DIR, "bottle", "train", "good")
 
 full_dataset = MVTecDataset(root_dir=ROOT_DIR)
 train_size = len(full_dataset) - 29
