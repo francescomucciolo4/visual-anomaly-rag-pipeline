@@ -1,5 +1,11 @@
 # Anomaly Detection con Autoencoder Convoluzionale sul MVTec Anomaly Detection Dataset - Categoria "Bottle"
 
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/4e66f3b3-afa7-4be7-9ebf-f0b93bc7378d" width="900" />
+  <br><br>
+  <em>Risultati Anomaly Detection</em>
+</p>
+
 In questo progetto viene mostrata l'implementazione di un sistema di rilevamento anomalie a livello immagine utilizzando un **Convolutional Autoencoder (CAE)** sul dataset **MVTec Anomaly Detection**, in particolare sulla categoria **"Bottle"**.  
 
 L'obiettivo è identificare difetti sulle bottiglie confrontando l'immagine originale con quella generata dal modello a partire dall'originale, calcolando un **punteggio di anomalia** basato sull'errore di ricostruzione.
