@@ -1,0 +1,29 @@
+============================================================
+Image: test\broken_small\008.png
+Class: broken_small
+Anomaly Score: 0.0841
+VLM description: A dark circle is on the inside of the bottle cap.
+============================================================
+
+**Quality Control Report**
+
+**Defect Summary**
+
+A dark circle is observed on the inside of the bottle cap, classified as "broken_small" with an anomaly score of 0.0841.
+
+**Probable Causes**
+
+1. Foreign material or surface damage: The presence of a dark circle on the inside of the bottle cap may indicate the presence of a foreign object or surface damage, which could have occurred during manufacturing or packaging.
+2. Contamination during filling or capping: The defect may have been introduced during the filling or capping process, potentially due to inadequate cleaning or inspection procedures.
+
+**Corrective Actions**
+
+1. Conduct a thorough inspection of the bottling and capping process to identify the source of the contamination.
+2. Implement additional cleaning and inspection procedures to prevent the introduction of foreign materials or surface damage.
+3. Review and refine the quality control process to ensure the detection of similar defects.
+
+**Urgency Level**
+
+Medium
+
+While the defect does not pose an immediate risk to the structural integrity of the bottle, it is still a significant quality issue that requires prompt attention to prevent further contamination or damage.

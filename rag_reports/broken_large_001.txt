@@ -1,0 +1,32 @@
+============================================================
+Image: test\broken_large\001.png
+Class: broken_large
+Anomaly Score: 0.0844
+VLM description: A bottle of glass with a broken top that is very large.
+============================================================
+
+**Quality Control Report**
+
+**Defect Summary**
+
+The defect detected is a "broken_large" type, characterized by a large structural break on the top opening of the glass bottle, resulting in missing glass fragments, large cracks, or significant portions of the rim broken off. The bottle opening may appear deformed or collapsed.
+
+**Probable Causes**
+
+Based on the defect description, probable causes include:
+
+* Improper capping or sealing process during manufacturing
+* Mechanical damage during handling or transportation
+* Inadequate quality control measures during glass blowing or forming process
+
+**Corrective Actions**
+
+To prevent recurrence of this defect, the following corrective actions are recommended:
+
+* Review and implement a more stringent capping or sealing process to ensure proper closure of the glass bottle
+* Conduct a thorough investigation into the handling and transportation processes to identify any potential sources of mechanical damage
+* Review and refine the glass blowing or forming process to reduce the likelihood of defects
+
+**Urgency Level**
+
+The urgency level for this defect is **Medium**. While the defect is significant and may impact product quality, it is not critical in the sense that it does not pose an immediate risk to consumer safety. However, prompt corrective action is still necessary to prevent further defects and maintain product quality standards.

@@ -1,0 +1,28 @@
+============================================================
+Image: test\contamination\017.png
+Class: contamination
+Anomaly Score: 0.0904
+VLM description: An object is sticking out of a clear glass bottle.
+============================================================
+
+**Quality Control Report**
+
+**Defect Summary**
+
+A foreign object is sticking out of a clear glass bottle, classified as a contamination defect. The anomaly score is 0.0904.
+
+**Probable Causes**
+
+1. Improper cleaning or inspection process, allowing debris to enter the bottle.
+2. Human error during packaging or handling, resulting in an object being inserted into the bottle.
+3. Contamination during manufacturing or storage, such as dust or fibers being introduced into the bottle.
+
+**Corrective Actions**
+
+1. Review and improve cleaning and inspection procedures to prevent debris entry.
+2. Implement additional quality control measures during packaging and handling to prevent human error.
+3. Conduct a thorough investigation into the manufacturing and storage processes to identify and address any potential contamination sources.
+
+**Urgency Level: Medium**
+
+The defect is considered medium-urgency due to the presence of a foreign object in the bottle, which could potentially affect the product's performance or customer safety. However, the object's size and shape do not pose an immediate risk, allowing for a medium-urgency classification.

@@ -1,0 +1,30 @@
+============================================================
+Image: test\broken_small\019.png
+Class: broken_small
+Anomaly Score: 0.0763
+VLM description: A small crack is visible on the glass bottle.
+============================================================
+
+**Quality Control Report**
+
+**Defect Summary:**
+
+A small crack is visible on the glass bottle, classified as a "broken_small" defect. The crack is located on the top opening of the bottle, compromising its structural integrity to a limited extent.
+
+**Probable Causes:**
+
+1. Handling or packaging damage during transportation or storage.
+2. Inadequate cleaning or inspection procedures.
+3. Minor manufacturing defect or imperfection.
+
+**Corrective Actions:**
+
+1. Conduct thorough visual inspections of all glass bottles upon receipt.
+2. Implement additional quality control measures to detect small cracks or chips.
+3. Consider adjusting manufacturing processes to reduce the likelihood of small imperfections.
+
+**Urgency Level:**
+
+Medium
+
+The small crack does not pose an immediate risk to the bottle's integrity, but it may still compromise its functionality and affect the product's overall quality. Addressing this defect promptly will help prevent potential issues and maintain customer satisfaction.

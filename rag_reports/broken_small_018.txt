@@ -1,0 +1,30 @@
+============================================================
+Image: test\broken_small\018.png
+Class: broken_small
+Anomaly Score: 0.0791
+VLM description: A broken glass on the top of a bottle is the defect you can see in the image.
+============================================================
+
+Quality Control Report: Broken Glass on Top of Bottle
+
+**Defect Summary**
+
+A broken glass defect has been detected on the top of a glass bottle, classified as "broken_small" with an anomaly score of 0.0791. The defect appears as a small crack or chip on the top opening of the glass bottle, partially compromising the structural integrity.
+
+**Probable Causes**
+
+1. Manufacturing error during the bottle forming process
+2. Handling damage during transportation or storage
+3. Contamination or foreign material on the bottle rim
+
+**Corrective Actions**
+
+1. Review and adjust the manufacturing process to prevent similar defects
+2. Implement additional quality control measures during handling and transportation
+3. Conduct a thorough cleaning and inspection of the bottle rim to remove any foreign material
+
+**Urgency Level**
+
+Medium
+
+This defect is considered medium urgency due to the potential for further damage or contamination if not addressed promptly. However, it does not pose an immediate risk to product safety or performance.

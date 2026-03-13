@@ -1,0 +1,38 @@
+============================================================
+Image: test\contamination\015.png
+Class: contamination
+Anomaly Score: 0.0885
+VLM description: The inside of the glass container has a black substance, possibly a stain.
+============================================================
+
+**Quality Control Report**
+
+**Defect Summary**
+
+A defect has been detected on a glass bottle, characterized by a black substance, possibly a stain, on the inside of the container. The anomaly score is 0.0885, classified as contamination.
+
+**Probable Causes**
+
+Based on the knowledge base, the probable causes of the defect are:
+
+1. Improper cleaning or handling procedures during the manufacturing process.
+2. Contamination from foreign materials or substances introduced during packaging or transportation.
+3. Inadequate glass formulation or manufacturing process, leading to the formation of impurities or defects.
+
+**Corrective Actions**
+
+To rectify this defect, the following corrective actions are recommended:
+
+1. Review and update cleaning and handling procedures to ensure proper sanitation and handling practices.
+2. Conduct thorough inspections of packaging and transportation processes to identify and eliminate sources of contamination.
+3. Investigate the glass formulation and manufacturing process to identify and correct any underlying defects or impurities.
+
+**Urgency Level**
+
+The urgency level for this defect is **Medium**. While the defect does not compromise the structural integrity of the bottle, it may affect the quality and purity of the contents. Timely corrective actions are necessary to prevent further contamination and ensure the integrity of the product.
+
+Recommendations:
+
+1. Conduct a thorough root cause analysis to identify the source of the contamination.
+2. Develop and implement corrective actions to prevent recurrence of the defect.
+3. Verify the effectiveness of the corrective actions through regular quality control checks.

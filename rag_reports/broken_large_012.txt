@@ -1,0 +1,31 @@
+============================================================
+Image: test\broken_large\012.png
+Class: broken_large
+Anomaly Score: 0.0825
+VLM description: The top of the bottle appears to be broken.
+============================================================
+
+**Quality Control Report**
+
+**Defect Summary:**
+
+The top of the bottle appears to be broken, with a large structural break on the opening, characterized by missing glass fragments, large cracks, or significant portions of the rim broken off. The bottle opening may appear deformed or collapsed.
+
+**Probable Causes:**
+
+1. Improper bottle handling or storage, leading to mechanical stress and subsequent breakage.
+2. Manufacturing defect, such as a faulty glass forming process or inadequate quality control during the production line.
+3. Contamination or foreign material introduction during the filling or capping process, which may have contributed to the breakage.
+
+**Corrective Actions:**
+
+1. Implement additional quality control measures to detect and reject defective bottles.
+2. Conduct thorough inspections of the production line to identify and correct any manufacturing defects.
+3. Review and revise handling and storage procedures to minimize mechanical stress on the bottles.
+4. Consider implementing additional cleaning and inspection procedures to prevent contamination during the filling and capping process.
+
+**Urgency Level:**
+
+**High**
+
+The presence of a large break on the bottle top compromises the structural integrity of the container, making it unsuitable for further use. Immediate corrective action is necessary to prevent further defective products from entering the market.

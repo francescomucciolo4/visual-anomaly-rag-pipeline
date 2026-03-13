@@ -1,0 +1,31 @@
+============================================================
+Image: test\contamination\005.png
+Class: contamination
+Anomaly Score: 0.1401
+VLM description: There is a piece of fabric or paper stuck inside the bottle.
+============================================================
+
+**Quality Control Report**
+
+**Defect Summary**
+
+A defect has been detected on a glass bottle, where a piece of fabric or paper is stuck inside the bottle. The anomaly score is 0.1401, indicating a moderate level of defect severity. The defect class is contamination.
+
+**Probable Causes**
+
+1. Poor packaging or handling practices, allowing foreign materials to enter the bottle during processing or transportation.
+2. Inadequate inspection or cleaning procedures, failing to detect and remove contaminants from the bottle.
+3. Human error during the bottling process, resulting in the introduction of extraneous materials into the bottle.
+
+**Corrective Actions**
+
+1. Implement additional quality control checks to ensure the bottle is thoroughly inspected for contaminants before filling.
+2. Review and improve packaging and handling procedures to minimize the risk of foreign materials entering the bottle.
+3. Conduct regular training and audits to ensure employees are following proper cleaning and inspection procedures.
+4. Consider using visual or mechanical inspection tools to detect contaminants more effectively.
+
+**Urgency Level**
+
+Medium
+
+This defect is considered medium-urgency as it can potentially affect the safety and quality of the product, as well as impact consumer confidence. While the fabric or paper fragment does not compromise the structural integrity of the bottle, it is still a contamination issue that requires prompt attention and correction.

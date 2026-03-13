@@ -1,0 +1,30 @@
+============================================================
+Image: test\broken_large\017.png
+Class: broken_large
+Anomaly Score: 0.0902
+VLM description: A large broken spot on the inside of the bottle.
+============================================================
+
+**Quality Control Report**
+
+**Defect Summary**
+
+A large broken spot has been detected on the inside of the glass bottle, classified as a "broken_large" defect. This anomaly has an anomaly score of 0.0902, indicating a moderate level of severity.
+
+**Probable Causes**
+
+1. Improper glass forming or annealing process, leading to internal stress and potential breaks.
+2. Inadequate inspection or cleaning procedures, allowing foreign material to become lodged inside the bottle.
+3. Handling or transportation damage, resulting in internal cracking or breakage.
+
+**Corrective Actions**
+
+1. Review and optimize the glass forming and annealing processes to minimize internal stress.
+2. Implement additional inspection and cleaning procedures to prevent foreign material from entering the bottle.
+3. Conduct thorough inspections of all glass bottles to detect and remove any defective or damaged items.
+
+**Urgency Level**
+
+Medium
+
+The "broken_large" defect on the inside of the glass bottle poses a moderate risk to product quality and safety. While it may not immediately compromise the structural integrity of the bottle, it can potentially lead to contamination or affect the overall appearance of the product. Corrective actions should be taken to address this issue promptly and prevent further defects.

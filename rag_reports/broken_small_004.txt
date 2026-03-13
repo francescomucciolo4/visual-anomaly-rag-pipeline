@@ -1,0 +1,30 @@
+============================================================
+Image: test\broken_small\004.png
+Class: broken_small
+Anomaly Score: 0.0778
+VLM description: A bottle with a broken top of a small size.
+============================================================
+
+**Quality Control Report**
+
+**Defect Summary:**
+
+The defective glass bottle exhibits a broken top of a small size, characterized as "broken_small" with an anomaly score of 0.0778. The break is likely a small crack or chip on the top opening of the glass bottle, compromising the structural integrity to a limited extent.
+
+**Probable Causes:**
+
+1. Minor mishandling or accidental drops during the manufacturing or packaging process.
+2. Inadequate quality control checks during the glass bottle production process.
+3. Improper storage or transportation, resulting in minor damage to the top opening.
+
+**Corrective Actions:**
+
+1. Conduct regular quality control checks on glass bottles to detect minor defects before they become more severe.
+2. Implement additional handling and storage procedures to prevent minor mishandling and accidental drops.
+3. Investigate the manufacturing process to identify potential causes of minor defects and implement corrective measures.
+
+**Urgency Level:**
+
+Medium
+
+While the defect is not critical, it is still important to address the issue to prevent further damage and maintain quality standards.

@@ -1,0 +1,33 @@
+============================================================
+Image: test\broken_large\018.png
+Class: broken_large
+Anomaly Score: 0.0947
+VLM description: A black bottle with a hole in the top.
+============================================================
+
+**Quality Control Report**
+
+**Defect Summary**
+
+The defect detected on the glass bottle is a large structural break, classified as "broken_large". The anomaly score of 0.0947 indicates a significant deviation from the expected quality standard.
+
+**Probable Causes**
+
+Based on the description of the defect, probable causes are:
+
+* Improper handling or cleaning procedures during the manufacturing process, leading to physical damage on the top opening.
+* Contamination during the filling or capping process, resulting in foreign material entering the bottle.
+
+**Corrective Actions**
+
+To prevent recurrence of this defect:
+
+* Implement strict handling and cleaning procedures to minimize physical damage on the top opening.
+* Conduct regular quality control checks on the filling and capping processes to ensure contamination-free operations.
+* Train production staff on proper handling and cleaning techniques.
+
+**Urgency Level**
+
+Medium
+
+The defect is significant, compromising the structural integrity of the bottle, but it does not pose an immediate risk to the product or consumer safety. Corrective actions should be taken promptly to prevent further defects and ensure compliance with quality standards.

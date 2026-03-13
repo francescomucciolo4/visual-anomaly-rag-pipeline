@@ -1,0 +1,30 @@
+============================================================
+Image: test\contamination\012.png
+Class: contamination
+Anomaly Score: 0.1488
+VLM description: A small, blurry area on the outside of a round bottle.
+============================================================
+
+**Quality Control Report**
+
+**Defect Summary:**
+
+A small, blurry area on the outside of a round bottle has been detected, classified as contamination (Anomaly score: 0.1488). This defect is characterized by a minor, unclear imperfection on the bottle's surface.
+
+**Probable Causes:**
+
+1. Foreign material or surface damage during manufacturing or handling processes.
+2. Human error or contamination during the filling or packaging stages.
+3. Inadequate cleaning or inspection procedures.
+
+**Corrective Actions:**
+
+1. Conduct a thorough investigation to identify the source of contamination.
+2. Implement additional cleaning or inspection procedures to ensure the bottle is free from defects.
+3. Review and modify manufacturing or handling processes to prevent similar defects from occurring.
+
+**Urgency Level:**
+
+Medium
+
+The defect is considered medium urgency because it does not compromise the structural integrity of the bottle, but it may affect the aesthetic appeal or the perceived quality of the product.

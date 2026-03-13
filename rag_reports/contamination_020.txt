@@ -1,0 +1,30 @@
+============================================================
+Image: test\contamination\020.png
+Class: contamination
+Anomaly Score: 0.1351
+VLM description: A glass bottle top with a brown streak on the inside.
+============================================================
+
+Quality Control Report: Defective Glass Bottle Top
+
+**Defect Summary**
+
+A defect has been detected on a glass bottle top with a brown streak on the inside, classified as contamination. The anomaly score is 0.1351.
+
+**Probable Causes**
+
+1. Inadequate cleaning process: The brown streak may be a result of residue or debris left behind during the cleaning process.
+2. Poor material handling: The streak could be caused by accidental contamination during handling or storage.
+3. Insufficient inspection: The defect may have been missed during the inspection process due to inadequate lighting or human error.
+
+**Corrective Actions**
+
+1. Review and revise cleaning process: Ensure that the cleaning process is thorough and effective in removing any residue or debris.
+2. Implement improved material handling procedures: Train personnel on proper handling and storage techniques to minimize the risk of contamination.
+3. Enhance inspection procedures: Increase the frequency and thoroughness of inspections to detect any defects or contamination earlier in the process.
+
+**Urgency Level**
+
+Medium
+
+While the defect is not critical, it is still important to address the issue to ensure the quality and integrity of the glass bottles. Immediate corrective action is required to prevent further contamination and ensure compliance with quality standards.

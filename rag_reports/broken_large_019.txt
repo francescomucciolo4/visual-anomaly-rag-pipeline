@@ -1,0 +1,27 @@
+============================================================
+Image: test\broken_large\019.png
+Class: broken_large
+Anomaly Score: 0.0832
+VLM description: A crack is present on the surface of the glass bottle.
+============================================================
+
+Quality Control Report: Defect Detection on Glass Bottle
+
+**Defect Summary:**
+A crack is present on the surface of the glass bottle, classified as "broken_large" with an anomaly score of 0.0832.
+
+**Probable Causes:**
+
+1. Improper glass manufacturing process or quality control oversight.
+2. Handling or storage issues resulting in excessive stress or impact on the bottle.
+
+**Corrective Actions:**
+
+1. Conduct a thorough investigation to identify the root cause of the defect.
+2. Implement quality control measures to ensure proper glass manufacturing and handling procedures.
+3. Review and update storage and handling protocols to prevent excessive stress or impact on the bottles.
+
+**Urgency Level:**
+Medium
+
+The presence of a crack on the surface of the glass bottle does not pose an immediate risk to product safety or functionality, but it can compromise the structural integrity of the bottle over time. Corrective actions should be taken promptly to prevent further defects and ensure product quality.

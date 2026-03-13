@@ -1,0 +1,29 @@
+============================================================
+Image: test\contamination\016.png
+Class: contamination
+Anomaly Score: 0.1145
+VLM description: The glass bottle top has a tiny hole in it.
+============================================================
+
+**Quality Control Report**
+
+**Defect Summary:**
+
+A tiny hole has been detected on the top of a glass bottle, classified as contamination. The anomaly score is 0.1145, indicating a relatively minor but still significant defect.
+
+**Probable Causes:**
+
+1. Improper manufacturing process or handling during production, resulting in a small crack or chip on the top opening.
+2. Contamination during packaging or transportation, where foreign material may have entered the bottle through the top opening.
+
+**Corrective Actions:**
+
+1. Conduct a thorough investigation into the manufacturing process and handling procedures to identify and correct any potential causes.
+2. Implement additional quality control measures during packaging and transportation to minimize the risk of contamination.
+3. Consider implementing a visual inspection process to detect small cracks or chips on the top opening.
+
+**Urgency Level:**
+
+Medium
+
+The defect is significant enough to warrant immediate attention, as it may compromise the structural integrity of the bottle. However, since the hole is small and the bottle is still functional, it is not a high-priority issue that requires immediate corrective action. A medium urgency level is assigned to reflect the need for prompt action while still allowing for a thorough investigation and implementation of corrective measures.

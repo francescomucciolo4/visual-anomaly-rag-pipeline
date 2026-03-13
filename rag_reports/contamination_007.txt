@@ -1,0 +1,32 @@
+============================================================
+Image: test\contamination\007.png
+Class: contamination
+Anomaly Score: 0.1010
+VLM description: The inside of the bottle is dirty and brown.
+============================================================
+
+**Quality Control Report**
+
+**Defect Summary**
+
+Defect ID: [Insert ID]
+Defect Class: Contamination
+Anomaly Score: 0.1010
+
+The inside of the glass bottle is dirty and brown, indicating the presence of foreign material or contaminants.
+
+**Probable Causes**
+
+1. Improper cleaning or sanitizing procedures during the manufacturing process.
+2. Contamination during filling or capping operations.
+3. Poor storage or handling practices allowing foreign substances to enter the bottle.
+
+**Corrective Actions**
+
+1. Review and revise cleaning and sanitizing procedures to ensure compliance with industry standards.
+2. Implement additional quality control checks during filling and capping operations to prevent contamination.
+3. Enhance storage and handling practices to prevent foreign substances from entering the bottle.
+
+**Urgency Level: Medium**
+
+The presence of contaminants inside the bottle can affect the product's quality, integrity, and potentially impact consumer safety. While the defect is not critical, it is essential to address the issue promptly to prevent further contamination and ensure compliance with regulatory requirements.

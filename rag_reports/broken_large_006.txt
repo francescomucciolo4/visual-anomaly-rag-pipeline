@@ -1,0 +1,28 @@
+============================================================
+Image: test\broken_large\006.png
+Class: broken_large
+Anomaly Score: 0.0957
+VLM description: A broken glass on the rim of the bottle.
+============================================================
+
+**Quality Control Report**
+
+**Defect Summary:**
+
+A broken glass on the rim of the bottle has been detected, classified as a "broken_large" defect. The anomaly score is 0.0957.
+
+**Probable Causes:**
+
+1. Improper glass forming or annealing process, leading to weak spots on the rim.
+2. Inadequate quality control during the manufacturing process, allowing the defect to pass through.
+3. Handling or transportation damage, causing the glass to break during or after bottling.
+
+**Corrective Actions:**
+
+1. Review and adjust the glass forming or annealing process to ensure stronger rims.
+2. Implement additional quality control measures during manufacturing to detect and reject defective bottles.
+3. Develop and implement improved handling and transportation procedures to minimize risk of damage.
+
+**Urgency Level:** Medium
+
+The defect is significant, affecting the structural integrity of the bottle, and may compromise the product's safety and performance. Corrective actions should be taken promptly to prevent further defects and ensure the quality of the product.

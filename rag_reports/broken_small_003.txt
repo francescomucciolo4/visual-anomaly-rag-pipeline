@@ -1,0 +1,29 @@
+============================================================
+Image: test\broken_small\003.png
+Class: broken_small
+Anomaly Score: 0.0865
+VLM description: A broken glass bottle top-down view with an inner circle showing the hole.
+============================================================
+
+Quality Control Report: Broken Glass Bottle Top
+
+**Defect Summary:**
+
+A broken glass bottle top has been detected, characterized by a small hole on the top-down view. The anomaly score is 0.0865, classified as a "broken_small" defect.
+
+**Probable Causes:**
+
+1. Handling or transportation damage: The small hole may have been caused by sudden impact or stress during handling or transportation, leading to a small crack or chip on the top opening.
+2. Manufacturing error: A minor manufacturing defect or variation in the glass formulation may have contributed to the small hole.
+
+**Corrective Actions:**
+
+1. Visual inspection: Conduct a thorough visual inspection of all glass bottles to detect any similar defects.
+2. Handling and transportation improvement: Implement or review handling and transportation procedures to minimize stress and impact on the glass bottles.
+3. Manufacturing process review: Review the glass manufacturing process to identify and address any minor defects or variations.
+
+**Urgency Level:**
+
+Medium
+
+The small hole does not compromise the structural integrity of the bottle, but it may affect the product's appearance and functionality. Corrective actions are necessary to prevent similar defects from occurring in the future.

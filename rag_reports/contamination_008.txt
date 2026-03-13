@@ -1,0 +1,39 @@
+============================================================
+Image: test\contamination\008.png
+Class: contamination
+Anomaly Score: 0.1025
+VLM description: The glass bottle has a contamination visible on the inside.
+============================================================
+
+**Quality Control Report**
+
+**Defect Summary**
+
+A contamination has been detected on the inside of a glass bottle, with an anomaly score of 0.1025. This defect falls under the category of "contamination" and is characterized by the presence of foreign material or surface damage visible on or inside the top opening of the bottle.
+
+**Probable Causes**
+
+Based on the available knowledge base, the probable causes of this contamination could be:
+
+* Foreign material accidentally introduced during the manufacturing process, such as threads, hairs, or fabric pieces
+* Improper cleaning or sterilization procedures, resulting in residual contaminants
+* Human error in handling or transporting the bottles, leading to the introduction of contaminants
+
+**Corrective Actions**
+
+To address this defect, the following corrective actions are recommended:
+
+* Implement stricter quality control measures during manufacturing to prevent foreign material from entering the process
+* Enhance cleaning and sterilization procedures to ensure the bottles are thoroughly cleaned and disinfected
+* Conduct regular audits and inspections to detect and correct any human errors or improper handling practices
+* Consider implementing additional measures, such as visual inspections or X-ray scanning, to detect contaminants before they reach the end-user
+
+**Urgency Level**
+
+The urgency level for this defect is **Medium**. While the contamination may not pose an immediate threat to the structural integrity of the bottle, it can still impact the overall quality and reliability of the product. It is essential to address this defect promptly to prevent any potential issues from arising in the future.
+
+Recommendations:
+
+* Implement corrective actions as soon as possible to prevent further contamination
+* Conduct regular monitoring and testing to ensure the effectiveness of the corrective actions
+* Review and update quality control procedures to prevent similar defects from occurring in the future

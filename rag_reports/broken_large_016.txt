@@ -1,0 +1,31 @@
+============================================================
+Image: test\broken_large\016.png
+Class: broken_large
+Anomaly Score: 0.0855
+VLM description: A bottle with a cracked opening in the center.
+============================================================
+
+**Quality Control Report**
+
+**Defect Summary**
+
+A defect has been detected on a glass bottle with a cracked opening in the center, classified as "broken_large" with an anomaly score of 0.0855. The defect is characterized by a significant crack or chip on the top opening of the glass bottle, compromising its structural integrity and potentially causing the opening to appear deformed or collapsed.
+
+**Probable Causes**
+
+1. Manufacturing defect: Improper glass processing or handling during the manufacturing process may have caused the crack or chip.
+2. Handling damage: Inadequate handling or storage of the glass bottles may have led to the defect.
+3. Contamination: Foreign material or surface damage on or inside the top opening of the bottle may have contributed to the defect.
+
+**Corrective Actions**
+
+1. Conduct a thorough investigation of the manufacturing process to identify the root cause of the defect.
+2. Implement quality control measures to prevent similar defects in the future, such as more stringent glass processing or handling procedures.
+3. Review handling and storage procedures to ensure that glass bottles are handled and stored in a way that minimizes the risk of damage.
+4. Inspect all glass bottles for similar defects and remove any that meet the "broken_large" classification.
+
+**Urgency Level**
+
+Medium
+
+The defect is significant enough to require immediate attention, but it is not critical to the overall functionality or safety of the glass bottle.

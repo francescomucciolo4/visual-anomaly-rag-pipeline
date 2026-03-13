@@ -1,0 +1,26 @@
+============================================================
+Image: test\contamination\011.png
+Class: contamination
+Anomaly Score: 0.1312
+VLM description: The top of a bottle has a black mark that is being shown from a top-down view.
+============================================================
+
+Quality Control Report:
+
+**Defect Summary:**
+The top of a glass bottle has a black mark visible from a top-down view, classified as a contamination defect with an anomaly score of 0.1312.
+
+**Probable Causes:**
+
+1. Foreign material (thread, hair, fabric, paper fragment) stuck inside or on the rim of the bottle.
+2. Surface damage (scratch, stain, discoloration, or dark mark) on the rim or inside the top opening of the bottle.
+
+**Corrective Actions:**
+
+1. Inspect all glass bottles for similar defects to identify the root cause of the contamination.
+2. Implement additional quality control measures to ensure the cleanliness of the bottle manufacturing process.
+3. Review and update the cleaning and inspection procedures for the top opening of the glass bottles.
+
+**Urgency Level:** Medium
+
+The defect is not critical, but it can affect the appearance and integrity of the bottle. Corrective actions should be taken to prevent future occurrences and maintain the quality of the product.

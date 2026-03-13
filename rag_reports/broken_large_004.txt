@@ -1,0 +1,30 @@
+============================================================
+Image: test\broken_large\004.png
+Class: broken_large
+Anomaly Score: 0.0752
+VLM description: A hole is visible on the bottle, suggesting that it has been broken.
+============================================================
+
+**Quality Control Report**
+
+**Defect Summary**
+
+A hole is visible on the bottle, suggesting that it has been broken. The defect has been classified as "broken_large" with an anomaly score of 0.0752.
+
+**Probable Causes**
+
+1. Handling damage during manufacturing or packaging process.
+2. Inadequate quality control checks during filling or capping process.
+3. Poor quality glass material or defects in the manufacturing process.
+
+**Corrective Actions**
+
+1. Conduct a thorough investigation into the manufacturing and packaging processes to identify the root cause of the defect.
+2. Implement additional quality control checks during filling and capping processes to prevent similar defects from occurring in the future.
+3. Review and improve glass material sourcing and manufacturing processes to ensure the quality of the raw materials meets standards.
+
+**Urgency Level**
+
+**High**
+
+The presence of a hole on the bottle compromises the structural integrity and poses a risk of contamination or leakage. Immediate attention is required to prevent further defects and ensure the quality and safety of the product.

@@ -1,0 +1,30 @@
+============================================================
+Image: test\contamination\001.png
+Class: contamination
+Anomaly Score: 0.0908
+VLM description: A black bottle with a small hole on the bottom.
+============================================================
+
+**Quality Control Report**
+
+**Defect Summary:**
+
+A black glass bottle with a small hole on the bottom has been detected, classified as a contamination defect with an anomaly score of 0.0908. The small hole on the bottom of the bottle indicates a breach in the structural integrity, potentially compromising the bottle's functionality.
+
+**Probable Causes:**
+
+1. Manufacturing defect: A small crack or chip on the bottom of the bottle may have occurred during the manufacturing process, leading to the hole.
+2. Handling or storage issue: Improper handling or storage of the bottles may have caused physical damage, resulting in the hole.
+3. Contamination during processing: Foreign material may have entered the bottle during the processing or packaging stages, causing the hole.
+
+**Corrective Actions:**
+
+1. Review manufacturing process: Verify that the manufacturing process is followed correctly to prevent similar defects from occurring.
+2. Inspect bottles: Conduct a thorough inspection of the bottles to identify any other defects or potential issues.
+3. Clean or replace affected bottles: Clean or replace any affected bottles to prevent further contamination or damage.
+
+**Urgency Level:**
+
+Medium
+
+The hole on the bottom of the bottle may not compromise the bottle's functionality immediately, but it can lead to contamination or other issues if left unchecked. Corrective actions should be taken promptly to prevent further defects and ensure the quality of the product.

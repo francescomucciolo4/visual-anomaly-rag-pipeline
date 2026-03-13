@@ -1,0 +1,25 @@
+============================================================
+Image: test\broken_small\012.png
+Class: broken_small
+Anomaly Score: 0.0807
+VLM description: A circular glass bottle with a broken part on the top.
+============================================================
+
+Quality Control Report: Defective Glass Bottle
+
+**Defect Summary:**
+A defective glass bottle with a broken part on the top, classified as "broken_small" with an anomaly score of 0.0807.
+
+**Probable Causes:**
+1. Minor handling or transportation damage during the manufacturing process or packaging stage.
+2. Inadequate inspection or quality control checks during production.
+
+**Corrective Actions:**
+
+1. Conduct a thorough visual inspection of all glass bottles to detect any similar defects.
+2. Review and adjust handling procedures for glass bottles during manufacturing and packaging to minimize the risk of damage.
+3. Implement additional quality control checks during production to ensure defects are detected and removed before packaging.
+
+**Urgency Level:** Medium
+
+Reason: While the defect does not pose an immediate risk to product safety, it may affect the aesthetic appearance and functionality of the glass bottle. Corrective actions are necessary to prevent similar defects from occurring in the future.

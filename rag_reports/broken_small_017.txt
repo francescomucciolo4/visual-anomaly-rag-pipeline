@@ -1,0 +1,29 @@
+============================================================
+Image: test\broken_small\017.png
+Class: broken_small
+Anomaly Score: 0.0762
+VLM description: A broken glass bottle with a small broken piece missing.
+============================================================
+
+**Quality Control Report**
+
+**Defect Summary:**
+
+A broken glass bottle with a small broken piece missing (anomaly score: 0.0762, defect class: broken_small)
+
+**Probable Causes:**
+
+1. Handling or transportation damage during the manufacturing process or storage
+2. Inadequate quality control measures during bottle production
+
+**Corrective Actions:**
+
+1. Review and improve handling and transportation procedures to minimize damage
+2. Conduct additional quality control checks during bottle production to detect and rectify defects
+3. Implement a more robust inspection process to detect small cracks or chips before packaging
+
+**Urgency Level:**
+
+Medium
+
+The presence of a small broken piece missing indicates a partial compromise of the bottle's structural integrity, which may lead to further damage or product contamination. While the issue is not catastrophic, prompt corrective action is necessary to prevent similar defects from occurring in the future.

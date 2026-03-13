@@ -1,0 +1,30 @@
+============================================================
+Image: test\broken_large\013.png
+Class: broken_large
+Anomaly Score: 0.0937
+VLM description: A broken glass bottle can be seen at the top of the image.
+============================================================
+
+Quality Control Report:
+
+**Defect Summary:**
+
+A broken glass bottle can be seen at the top of the image, classified as a "broken_large" defect. The structural integrity of the bottle is partially compromised, with missing glass fragments, large cracks, or significant portions of the rim broken off.
+
+**Probable Causes:**
+
+1. Improper glass blowing or forming process, leading to weak points in the glass.
+2. Handling or storage damage during the manufacturing process.
+3. Inadequate quality control checks during packaging or shipping.
+
+**Corrective Actions:**
+
+1. Review and refine the glass blowing or forming process to eliminate weak points.
+2. Implement additional quality control checks during packaging and shipping to prevent damage.
+3. Train handlers and storage personnel on proper handling and storage procedures.
+
+**Urgency Level:**
+
+High
+
+The defect is significant, compromising the structural integrity of the bottle, and requires immediate attention to prevent further damage or potential harm to users.

@@ -1,0 +1,38 @@
+============================================================
+Image: test\broken_large\002.png
+Class: broken_large
+Anomaly Score: 0.0888
+VLM description: A black circular object is broken off from the top of the bottle.
+============================================================
+
+Quality Control Report: Defect Detection on Glass Bottle
+
+**Defect Summary**
+
+A black circular object is broken off from the top of the bottle, classified as a "broken_large" defect. The anomaly score is 0.0888.
+
+**Probable Causes**
+
+Based on the description, the probable causes of this defect are:
+
+* Manufacturing or processing error during the bottle production process
+* Handling or shipping damage during transportation
+* Insufficient quality control measures during packaging or labeling
+
+**Corrective Actions**
+
+To prevent recurrence of this defect, the following corrective actions are recommended:
+
+* Implement additional quality control checks during the manufacturing and packaging processes
+* Review and improve handling and shipping procedures to minimize damage during transportation
+* Conduct regular inspections of the bottle production line to ensure compliance with quality standards
+
+**Urgency Level**
+
+The urgency level for this defect is **Medium**. While the defect is significant, it does not pose an immediate risk to product safety or functionality. However, prompt corrective actions are necessary to prevent further defects and ensure quality standards are met.
+
+Recommendations:
+
+* Conduct a thorough investigation to determine the root cause of the defect
+* Develop and implement corrective actions to prevent recurrence
+* Monitor and track the effectiveness of corrective actions

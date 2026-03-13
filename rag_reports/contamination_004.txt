@@ -1,0 +1,30 @@
+============================================================
+Image: test\contamination\004.png
+Class: contamination
+Anomaly Score: 0.0798
+VLM description: A glass bottle top with some contamination on it.
+============================================================
+
+**Quality Control Report**
+
+**Defect Summary**
+
+A defect has been detected on a glass bottle top with some contamination on it. The anomaly score is 0.0798, indicating a moderate level of deviation from the expected quality standard. The defect class is contamination.
+
+**Probable Causes**
+
+1. Improper cleaning procedures during the manufacturing process, leading to the presence of foreign material on the bottle top.
+2. Inadequate inspection or quality control measures during the packaging process, allowing contaminants to enter the packaging line.
+3. Human error during the filling or capping process, resulting in the introduction of foreign material onto the bottle top.
+
+**Corrective Actions**
+
+1. Review and revise cleaning procedures to ensure all surfaces are thoroughly cleaned and sanitized.
+2. Implement additional quality control measures during the packaging process to detect and remove contaminants.
+3. Conduct training sessions for operators on proper filling and capping procedures to minimize the risk of human error.
+
+**Urgency Level**
+
+Medium
+
+While the contamination does not compromise the structural integrity of the bottle, it does affect the overall appearance and potentially the quality of the product. Immediate corrective action is necessary to prevent further defects and ensure customer satisfaction.

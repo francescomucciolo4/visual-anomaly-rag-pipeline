@@ -1,0 +1,31 @@
+============================================================
+Image: test\contamination\018.png
+Class: contamination
+Anomaly Score: 0.0740
+VLM description: A glass bottle top with a string inside and a hole.
+============================================================
+
+Quality Control Report: Defect Detection - Glass Bottle Top
+
+**Defect Summary:**
+
+A defect has been detected on a glass bottle top with a string inside and a hole, classified as contamination with an anomaly score of 0.0740.
+
+**Probable Causes:**
+
+1. Inadequate cleaning and inspection processes prior to filling and packaging, allowing foreign material to enter the bottle.
+2. Improper handling or transportation of the glass bottles, leading to contamination during the process.
+3. Inadequate quality control measures in place to detect and remove defective bottles from the production line.
+
+**Corrective Actions:**
+
+1. Implement enhanced cleaning and inspection procedures to ensure the glass bottles are free from contaminants before filling and packaging.
+2. Conduct regular inspections and audits to verify compliance with quality control protocols.
+3. Train production staff on proper handling and transportation procedures to minimize the risk of contamination.
+4. Consider implementing additional quality control measures, such as X-ray or vision inspection, to detect defects like this one.
+
+**Urgency Level:**
+
+Medium
+
+This defect is considered medium-priority because it does not pose an immediate risk to the structural integrity of the bottle, but it can still impact the product's appearance and quality. Addressing this issue promptly will help prevent similar defects from occurring in the future and maintain customer satisfaction.

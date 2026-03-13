@@ -1,0 +1,28 @@
+============================================================
+Image: test\contamination\010.png
+Class: contamination
+Anomaly Score: 0.1250
+VLM description: The image shows a bottle that has a contamined surface.
+============================================================
+
+**Quality Control Report**
+
+**Defect Summary**
+
+A contaminated surface defect has been detected on a glass bottle, with an anomaly score of 0.1250. The contamination is visible on or inside the top opening of the bottle, potentially compromising the structural integrity.
+
+**Probable Causes**
+
+1. Poor cleaning and sanitizing procedures during the manufacturing process.
+2. Insufficient inspection or quality control measures to detect contamination.
+3. Human error during handling or packaging of the bottles.
+
+**Corrective Actions**
+
+1. Review and revise cleaning and sanitizing procedures to ensure effective removal of contaminants.
+2. Increase inspection and quality control measures to detect contamination earlier in the process.
+3. Provide additional training to manufacturing personnel on handling and packaging procedures to minimize human error.
+
+**Urgency Level: Medium**
+
+The contamination defect poses a moderate risk to product quality and customer satisfaction. While the defect is not catastrophic, it is essential to address the issue promptly to prevent further contamination and ensure compliance with quality standards.

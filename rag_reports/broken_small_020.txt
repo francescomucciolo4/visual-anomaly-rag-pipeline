@@ -1,0 +1,30 @@
+============================================================
+Image: test\broken_small\020.png
+Class: broken_small
+Anomaly Score: 0.0812
+VLM description: A glass bottle with a broken part on the side.
+============================================================
+
+**Quality Control Report**
+
+**Defect Summary:**
+
+The glass bottle in question exhibits a broken part on the side, classified as "broken_small" with an anomaly score of 0.0812. The defect appears to be a small crack or chip on the side of the bottle, compromising its structural integrity to some extent.
+
+**Probable Causes:**
+
+1. Inadequate glass manufacturing process parameters, potentially resulting in weak spots or defects in the glass material.
+2. Handling or packaging issues during transportation or storage, leading to minor damage or cracks.
+3. Insufficient inspection or quality control measures during the manufacturing or packaging stages.
+
+**Corrective Actions:**
+
+1. Review and adjust glass manufacturing process parameters to minimize the occurrence of weak spots or defects.
+2. Implement additional handling and packaging procedures to prevent damage during transportation or storage.
+3. Conduct regular quality control inspections to detect and address defects early in the manufacturing or packaging process.
+
+**Urgency Level:**
+
+Medium
+
+The defect is classified as "broken_small," indicating a minor compromise to the bottle's structural integrity. While the bottle may still be functional, it is essential to address the root cause to prevent similar defects from recurring and potentially affecting the overall quality of the product.

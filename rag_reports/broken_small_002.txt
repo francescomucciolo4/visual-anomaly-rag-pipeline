@@ -1,0 +1,30 @@
+============================================================
+Image: test\broken_small\002.png
+Class: broken_small
+Anomaly Score: 0.0892
+VLM description: A bottle with a broken top on it.
+============================================================
+
+**Quality Control Report**
+
+**Defect Summary:**
+
+A bottle with a broken top on it has been detected, classified as a "broken_small" defect with an anomaly score of 0.0892. The top opening of the glass bottle exhibits a significant structural break, characterized by missing glass fragments, large cracks, or a portion of the rim broken off.
+
+**Probable Causes:**
+
+1. Mechanical damage during handling or transportation.
+2. Improper cleaning or drying processes, leading to stress concentration and subsequent breakage.
+3. Manufacturing defects, such as inadequate glass formulation or processing issues.
+
+**Corrective Actions:**
+
+1. Implement additional quality control measures during handling and transportation to minimize mechanical damage.
+2. Review and optimize cleaning and drying processes to reduce stress concentration and prevent breakage.
+3. Collaborate with the manufacturing team to identify and address any underlying defects in glass formulation or processing.
+
+**Urgency Level:**
+
+**Medium**
+
+The broken top on the glass bottle presents a moderate risk to product quality and functionality. While the defect does not affect the overall structural integrity of the bottle, it may compromise the seal and potentially impact the product's shelf life or performance. Immediate corrective actions are necessary to prevent further defects and maintain product quality.

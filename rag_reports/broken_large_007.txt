@@ -1,0 +1,24 @@
+============================================================
+Image: test\broken_large\007.png
+Class: broken_large
+Anomaly Score: 0.0873
+VLM description: A crack in the edge of the bottle is visible in the top-down view.
+============================================================
+
+Quality Control Report: Glass Bottle Defect
+
+**Defect Summary:**
+A crack in the edge of the bottle is visible in the top-down view, classified as "broken_large" with an anomaly score of 0.0873.
+
+**Probable Causes:**
+1. Improper handling or transportation, leading to sudden stress on the bottle's edge.
+2. Inadequate quality control during the glassblowing process, resulting in a weak spot in the glass.
+
+**Corrective Actions:**
+
+1. Review and improve handling and transportation procedures to minimize stress on the bottle's edge.
+2. Conduct a thorough inspection of the glassblowing process to identify and correct any weaknesses or flaws that may be contributing to the defect.
+
+**Urgency Level:** Medium
+
+The defect is considered medium-priority because it does not immediately compromise the bottle's structural integrity, but it can potentially lead to further damage or breakage if left unchecked. Corrective actions should be implemented to prevent the defect from spreading or causing more significant issues.

@@ -1,0 +1,31 @@
+============================================================
+Image: test\broken_large\003.png
+Class: broken_large
+Anomaly Score: 0.1231
+VLM description: An object with a black top down view with a hole inside.
+============================================================
+
+**Quality Control Report**
+
+**Defect Summary**
+
+A defect has been detected on a glass bottle with a black top-down view featuring a hole inside. The anomaly score is 0.1231, and the defect class is "broken_large".
+
+**Probable Causes**
+
+Based on the provided knowledge base, the probable causes of this defect are:
+
+* A large structural break on the top opening of the glass bottle, characterized by missing glass fragments, large cracks, or significant portions of the rim broken off.
+* Foreign material or surface damage visible on or inside the top opening of the bottle, such as physical objects like threads, hairs, or fabric pieces stuck inside or on the rim.
+
+**Corrective Actions**
+
+To correct this defect, the following actions are recommended:
+
+* Inspect the glass bottle for any loose fragments or debris and remove them to prevent further damage.
+* Check for any foreign material or surface damage on or inside the top opening of the bottle and remove or clean it as necessary.
+* Conduct a thorough visual inspection of the bottle to detect any other potential defects or damage.
+
+**Urgency Level**
+
+The urgency level for this defect is **Medium**. While the defect does not pose an immediate risk to the bottle's structural integrity, it does require attention to prevent further damage and ensure the bottle's overall quality.

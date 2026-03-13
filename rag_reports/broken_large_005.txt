@@ -1,0 +1,27 @@
+============================================================
+Image: test\broken_large\005.png
+Class: broken_large
+Anomaly Score: 0.0758
+VLM description: A bottle of soda has a large broken hole in the top.
+============================================================
+
+**Quality Control Report**
+
+**Defect Summary:**
+A large broken hole in the top of a glass bottle, characterized by missing glass fragments, large cracks, or significant portions of the rim broken off. This defect significantly compromises the structural integrity of the bottle.
+
+**Probable Causes:**
+
+1. Manufacturing defect: Improper glass forming or annealing process, leading to weakness in the rim area.
+2. Handling damage: Rough handling or improper storage may have caused the bottle to sustain impact damage, resulting in the broken hole.
+3. Contamination: Foreign material or debris may have accumulated on the rim, leading to a weak spot that eventually broke.
+
+**Corrective Actions:**
+
+1. Review manufacturing process: Conduct a thorough review of the glass forming and annealing process to identify and correct any potential defects.
+2. Enhance handling and storage procedures: Implement additional safeguards to prevent rough handling and improper storage, which may have contributed to the defect.
+3. Inspect and clean bottles: Regularly inspect and clean bottles to prevent contamination and accumulation of foreign materials on the rim.
+
+**Urgency Level:**
+**High**
+The defect is significant and could compromise the safety and quality of the soda, as well as the overall customer experience. Corrective actions should be taken promptly to prevent similar defects from occurring in the future.

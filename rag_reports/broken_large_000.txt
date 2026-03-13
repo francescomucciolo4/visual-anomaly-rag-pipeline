@@ -1,0 +1,30 @@
+============================================================
+Image: test\broken_large\000.png
+Class: broken_large
+Anomaly Score: 0.0893
+VLM description: The top of the bottle has a large crack in it.
+============================================================
+
+**Quality Control Report**
+
+**Defect Summary:**
+
+The top of the glass bottle has a large crack in it, which falls under the defect class "broken_large". This defect compromises the structural integrity of the bottle and may pose a risk to product safety and quality.
+
+**Probable Causes:**
+
+1. Improper handling or transportation of the bottles, which may have caused stress and fatigue on the glass.
+2. Defective glass manufacturing process or material, leading to weak points in the bottle's structure.
+3. Inadequate quality control checks during the manufacturing process, allowing the defect to go undetected.
+
+**Corrective Actions:**
+
+1. Implement additional quality control checks during manufacturing to detect and reject defective bottles.
+2. Improve handling and transportation procedures to minimize stress on the glass.
+3. Conduct a thorough investigation into the manufacturing process to identify and correct any defects or weaknesses.
+
+**Urgency Level:**
+
+**High**
+
+The presence of a large crack on the bottle's top opening poses a significant risk to product safety and quality. Immediate corrective action is required to prevent further defects and ensure the integrity of the product.

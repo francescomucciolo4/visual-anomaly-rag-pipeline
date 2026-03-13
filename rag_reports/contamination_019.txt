@@ -1,0 +1,30 @@
+============================================================
+Image: test\contamination\019.png
+Class: contamination
+Anomaly Score: 0.0742
+VLM description: A hole on the top of the glass bottle.
+============================================================
+
+**Quality Control Report**
+
+**Defect Summary:**
+
+A hole has been detected on the top of the glass bottle, classified as a contamination defect with an anomaly score of 0.0742. The hole is characterized as a small crack or chip on the top opening, compromising the structural integrity to some extent.
+
+**Probable Causes:**
+
+1. Improper glass manufacturing process or handling during the production line.
+2. Inadequate quality control measures during the manufacturing process.
+3. Human error during packaging or labeling, resulting in the contamination.
+
+**Corrective Actions:**
+
+1. Conduct a thorough investigation to identify the root cause of the defect.
+2. Implement additional quality control measures during the manufacturing process to prevent similar defects from occurring.
+3. Review and adjust packaging and labeling procedures to prevent contamination.
+
+**Urgency Level:**
+
+**Medium**
+
+The hole on the top of the glass bottle compromises the structural integrity, but it does not pose an immediate safety risk. However, it is essential to address this issue promptly to prevent further contamination and ensure the quality of the product.

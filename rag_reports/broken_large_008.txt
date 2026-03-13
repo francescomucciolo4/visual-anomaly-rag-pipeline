@@ -1,0 +1,30 @@
+============================================================
+Image: test\broken_large\008.png
+Class: broken_large
+Anomaly Score: 0.0922
+VLM description: There is a large crack in the center of the bottle.
+============================================================
+
+**Quality Control Report**
+
+**Defect Summary:**
+
+The glass bottle in question has a large crack in the center, compromising its structural integrity. The anomaly score is 0.0922, and the defect class is "broken_large".
+
+**Probable Causes:**
+
+1. Manufacturing defect: Insufficient glass quality or improper manufacturing process leading to excessive stress concentration.
+2. Handling damage: Improper handling or storage resulting in excessive stress or impact, causing the crack.
+3. Thermal shock: Sudden temperature changes during manufacturing, transportation, or storage causing the glass to expand and contract, leading to cracking.
+
+**Corrective Actions:**
+
+1. Conduct a thorough review of the manufacturing process to identify and address any potential causes.
+2. Implement additional quality control measures to detect and reject defective glass.
+3. Provide training to handlers and storage personnel on proper handling and storage procedures.
+
+**Urgency Level:**
+
+**High**
+
+This defect poses a significant risk to the structural integrity of the bottle, which could lead to catastrophic failures or compromise the product's functionality. Urgent corrective actions are required to prevent further defects and ensure the quality of the product.

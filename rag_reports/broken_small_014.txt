@@ -1,0 +1,30 @@
+============================================================
+Image: test\broken_small\014.png
+Class: broken_small
+Anomaly Score: 0.0788
+VLM description: The glass bottle top is broken and has a chip.
+============================================================
+
+**Quality Control Report**
+
+**Defect Summary:**
+
+A defect has been detected on a glass bottle, characterized by a broken top and a chip. The anomaly score is 0.0788, classified as "broken_small". The defect affects the structural integrity of the bottle, although no large fragments are missing.
+
+**Probable Causes:**
+
+1. Manufacturing process variation: Minor errors during the glass forming or finishing processes could have caused the chip and break.
+2. Material defect: The glass material may have contained impurities or inclusions that led to the defect.
+3. Handling or shipping damage: Rough handling or transportation could have caused the breakage.
+
+**Corrective Actions:**
+
+1. Review and adjust manufacturing processes to minimize the likelihood of similar defects.
+2. Conduct material testing to identify any material-related issues.
+3. Implement improved handling and packaging procedures to prevent damage during shipping and storage.
+
+**Urgency Level:**
+
+Medium
+
+The defect is significant enough to require attention, but it does not pose an immediate risk to the bottle's overall integrity. However, it is essential to address the issue to prevent further defects and ensure consistent quality.

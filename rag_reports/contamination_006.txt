@@ -1,0 +1,27 @@
+============================================================
+Image: test\contamination\006.png
+Class: contamination
+Anomaly Score: 0.1676
+VLM description: A round glass container with a small scratch across the center of it, which is the center of the image.
+============================================================
+
+**Quality Control Report**
+
+**Defect Summary:**
+
+A small scratch across the center of the glass bottle, classified as contamination under defect class. Anomaly score: 0.1676.
+
+**Probable Causes:**
+
+1. Insufficient cleaning during manufacturing process, allowing foreign particles to adhere to the glass surface.
+2. Inadequate quality control measures during bottle inspection, leading to the scratch going undetected.
+
+**Corrective Actions:**
+
+1. Implement additional cleaning steps during the manufacturing process to ensure a thorough removal of contaminants.
+2. Increase the frequency of quality control inspections to detect defects like this scratch earlier in the process.
+3. Consider using automated inspection systems to improve accuracy and efficiency.
+
+**Urgency Level:** Medium
+
+The scratch is a minor defect that does not compromise the structural integrity of the bottle, but it may affect the appearance and perceived quality of the product. Corrective actions should be taken to prevent similar defects from occurring in the future.
