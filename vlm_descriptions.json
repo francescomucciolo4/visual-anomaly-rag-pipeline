@@ -1,0 +1,266 @@
+[
+  {
+    "image_path": "test/broken_large/000.png",
+    "description": "A broken glass on a bottle top-down view.",
+    "anomaly_score": 0.0892918035387992,
+    "defect_class": "broken_large"
+  },
+  {
+    "image_path": "test/broken_large/001.png",
+    "description": "A close up of a broken bottle with a crack down the middle of it.",
+    "anomaly_score": 0.0843675732612609,
+    "defect_class": "broken_large"
+  },
+  {
+    "image_path": "test/broken_large/002.png",
+    "description": "A small hole in the black top of a bottle.",
+    "anomaly_score": 0.0888184681534767,
+    "defect_class": "broken_large"
+  },
+  {
+    "image_path": "test/broken_large/003.png",
+    "description": "A glass bottle top with a hole in it.",
+    "anomaly_score": 0.1230581551790237,
+    "defect_class": "broken_large"
+  },
+  {
+    "image_path": "test/broken_large/004.png",
+    "description": "The top of a glass bottle has been broken.",
+    "anomaly_score": 0.0752400457859039,
+    "defect_class": "broken_large"
+  },
+  {
+    "image_path": "test/broken_large/005.png",
+    "description": "A broken bottle is viewed from the top down.",
+    "anomaly_score": 0.0757984220981597,
+    "defect_class": "broken_large"
+  },
+  {
+    "image_path": "test/broken_large/006.png",
+    "description": "The bottle has a crack in it that is broken into pieces.",
+    "anomaly_score": 0.0957097858190536,
+    "defect_class": "broken_large"
+  },
+  {
+    "image_path": "test/broken_large/007.png",
+    "description": "The glass bottle has a large crack in the top.",
+    "anomaly_score": 0.0872851759195327,
+    "defect_class": "broken_large"
+  },
+  {
+    "image_path": "test/broken_large/008.png",
+    "description": "A broken glass bottle with a large crack in the top.",
+    "anomaly_score": 0.0922120586037635,
+    "defect_class": "broken_large"
+  },
+  {
+    "image_path": "test/broken_large/012.png",
+    "description": "A circular hole on the top of a bottle.",
+    "anomaly_score": 0.082468457520008,
+    "defect_class": "broken_large"
+  },
+  {
+    "image_path": "test/broken_large/013.png",
+    "description": "A top-down view of a glass bottle with a large hole in the top.",
+    "anomaly_score": 0.0937490984797477,
+    "defect_class": "broken_large"
+  },
+  {
+    "image_path": "test/broken_large/014.png",
+    "description": "A glass bottle top that has a crack in it and has been scratched.",
+    "anomaly_score": 0.0787600725889206,
+    "defect_class": "broken_large"
+  },
+  {
+    "image_path": "test/broken_large/015.png",
+    "description": "A black spot on the side of a dark bottle that is broken.",
+    "anomaly_score": 0.0829017162322998,
+    "defect_class": "broken_large"
+  },
+  {
+    "image_path": "test/broken_large/016.png",
+    "description": "A broken glass bottle has a crack in the center.",
+    "anomaly_score": 0.0855101570487022,
+    "defect_class": "broken_large"
+  },
+  {
+    "image_path": "test/broken_large/017.png",
+    "description": "The neck of the bottle has a broken, large hole in it.",
+    "anomaly_score": 0.0902046859264373,
+    "defect_class": "broken_large"
+  },
+  {
+    "image_path": "test/broken_large/018.png",
+    "description": "A close up of a bottle with a large crack on the top.",
+    "anomaly_score": 0.094695046544075,
+    "defect_class": "broken_large"
+  },
+  {
+    "image_path": "test/broken_large/019.png",
+    "description": "The bottle has a broken top which is of a large size.",
+    "anomaly_score": 0.0832244157791137,
+    "defect_class": "broken_large"
+  },
+  {
+    "image_path": "test/broken_small/002.png",
+    "description": "A small broken part of the glass bottle is visible.",
+    "anomaly_score": 0.0892277508974075,
+    "defect_class": "broken_small"
+  },
+  {
+    "image_path": "test/broken_small/003.png",
+    "description": "A bottle with a small hole in the side of it.",
+    "anomaly_score": 0.0865356028079986,
+    "defect_class": "broken_small"
+  },
+  {
+    "image_path": "test/broken_small/004.png",
+    "description": "A broken small defect is observed on this bottle.",
+    "anomaly_score": 0.0778072997927665,
+    "defect_class": "broken_small"
+  },
+  {
+    "image_path": "test/broken_small/008.png",
+    "description": "The top of the glass bottle is broken into many small pieces.",
+    "anomaly_score": 0.0841371566057205,
+    "defect_class": "broken_small"
+  },
+  {
+    "image_path": "test/broken_small/010.png",
+    "description": "A bottle that has a broken rim on it.",
+    "anomaly_score": 0.0776268690824508,
+    "defect_class": "broken_small"
+  },
+  {
+    "image_path": "test/broken_small/012.png",
+    "description": "A glass bottle with a top-down view and a broken part at the bottom.",
+    "anomaly_score": 0.0807472839951515,
+    "defect_class": "broken_small"
+  },
+  {
+    "image_path": "test/broken_small/014.png",
+    "description": "A bottle with a cracked top on a top down view.",
+    "anomaly_score": 0.0787682682275772,
+    "defect_class": "broken_small"
+  },
+  {
+    "image_path": "test/broken_small/017.png",
+    "description": "The top of a glass bottle has a chip in it.",
+    "anomaly_score": 0.0762002617120742,
+    "defect_class": "broken_small"
+  },
+  {
+    "image_path": "test/broken_small/018.png",
+    "description": "A hole is inside of the black circle, possibly a bottle lid.",
+    "anomaly_score": 0.0791218280792236,
+    "defect_class": "broken_small"
+  },
+  {
+    "image_path": "test/broken_small/019.png",
+    "description": "The defect in this bottle is broken small.",
+    "anomaly_score": 0.0762872993946075,
+    "defect_class": "broken_small"
+  },
+  {
+    "image_path": "test/broken_small/020.png",
+    "description": "a broken top of a glass bottle in a circle.",
+    "anomaly_score": 0.0811927616596221,
+    "defect_class": "broken_small"
+  },
+  {
+    "image_path": "test/contamination/000.png",
+    "description": "A bottle has a dark spot on it that is likely a defect caused by contamination.",
+    "anomaly_score": 0.1052940413355827,
+    "defect_class": "contamination"
+  },
+  {
+    "image_path": "test/contamination/001.png",
+    "description": "a black circle with a hole on top and a white object at the bottom.",
+    "anomaly_score": 0.0908089876174926,
+    "defect_class": "contamination"
+  },
+  {
+    "image_path": "test/contamination/004.png",
+    "description": "A dark spot is present in the center of the bottle.",
+    "anomaly_score": 0.0797610580921173,
+    "defect_class": "contamination"
+  },
+  {
+    "image_path": "test/contamination/005.png",
+    "description": "A glass bottle top-down view shows a defect of the type contamination.",
+    "anomaly_score": 0.1400880366563797,
+    "defect_class": "contamination"
+  },
+  {
+    "image_path": "test/contamination/006.png",
+    "description": "A bottle with a contamined opening is shown in a top-down view.",
+    "anomaly_score": 0.1676454991102218,
+    "defect_class": "contamination"
+  },
+  {
+    "image_path": "test/contamination/007.png",
+    "description": "An inside of a bottle that is contaminated.",
+    "anomaly_score": 0.1010139212012291,
+    "defect_class": "contamination"
+  },
+  {
+    "image_path": "test/contamination/008.png",
+    "description": "a clear glass bottle with a brown top and a round black spot on the inside.",
+    "anomaly_score": 0.1025196090340614,
+    "defect_class": "contamination"
+  },
+  {
+    "image_path": "test/contamination/010.png",
+    "description": "A black object is seen through the glass bottle.",
+    "anomaly_score": 0.1249963715672493,
+    "defect_class": "contamination"
+  },
+  {
+    "image_path": "test/contamination/011.png",
+    "description": "An orange top that is on top of the bottle.",
+    "anomaly_score": 0.1312208920717239,
+    "defect_class": "contamination"
+  },
+  {
+    "image_path": "test/contamination/012.png",
+    "description": "A small black spot on the inner edge of the bottle.",
+    "anomaly_score": 0.148771584033966,
+    "defect_class": "contamination"
+  },
+  {
+    "image_path": "test/contamination/015.png",
+    "description": "The image contains a bottle with a black cap and a black inside.",
+    "anomaly_score": 0.0885466858744621,
+    "defect_class": "contamination"
+  },
+  {
+    "image_path": "test/contamination/016.png",
+    "description": "The bottom of a bottle has a smudge of something on it.",
+    "anomaly_score": 0.1144957691431045,
+    "defect_class": "contamination"
+  },
+  {
+    "image_path": "test/contamination/017.png",
+    "description": "A glass bottle with a small piece of black plastic on the inside.",
+    "anomaly_score": 0.0903672724962234,
+    "defect_class": "contamination"
+  },
+  {
+    "image_path": "test/contamination/018.png",
+    "description": "An open bottle with a string going through it.",
+    "anomaly_score": 0.0739906579256057,
+    "defect_class": "contamination"
+  },
+  {
+    "image_path": "test/contamination/019.png",
+    "description": "The bottle has a visible contamination that you can see through the lens.",
+    "anomaly_score": 0.0741615816950798,
+    "defect_class": "contamination"
+  },
+  {
+    "image_path": "test/contamination/020.png",
+    "description": "A brown spot on the top of the glass bottle.",
+    "anomaly_score": 0.1350938081741333,
+    "defect_class": "contamination"
+  }
+]

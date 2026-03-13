@@ -4,7 +4,7 @@ import json
 import os
 
 CSV_PATH = "detection_results/results.csv"
-OUTPUT_PATH = "detection_results/vlm_descriptions.json"
+OUTPUT_PATH = "vlm_descriptions.json"
 
 def describe_anomaly(image_path, defect_class):
 
@@ -24,8 +24,11 @@ Describe in one sentence the defect you see in the image."""
         }]
     )
 
+    parts = image_path.replace("\\", "/").split("/")
+    short_path = "/".join(parts[-3:])
+
     return {
-        "image_path": image_path,
+        "image_path": short_path, 
         "description": response["message"]["content"].strip(),
         "anomaly_score": None,
         "defect_class": defect_class
