@@ -99,7 +99,7 @@ Il progetto utilizza la categoria **"Bottle"** del dataset **MVTec Anomaly Detec
 Image: test\broken_large\000.png
 Class: broken_large
 Anomaly Score: 0.0893
-VLM Description: The top of the bottle has a large crack in it.
+VLM Description: A broken glass on a bottle top-down view.
 ```
 
 **Quality Control Report**
