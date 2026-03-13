@@ -128,7 +128,7 @@ The presence of a large crack on the bottle's top opening poses a significant ri
 ## Tecnologie Utilizzate
 
 - Python, PyTorch, NumPy, Scikit-learn, Pandas, Matplotlib
-- Ollama (LLaVA, Llama 3)
+- Ollama (LLaVA-LLaMA3 , Llama 3)
 - LangChain, ChromaDB, sentence-transformers
 
 ---
