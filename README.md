@@ -127,9 +127,18 @@ The presence of a large crack on the bottle's top opening poses a significant ri
 
 ## Tecnologie Utilizzate
 
+**Anomaly Detection**
 - Python, PyTorch, NumPy, Scikit-learn, Pandas, Matplotlib
-- Ollama (LLaVA-LLaMA3 , Llama 3)
-- LangChain, ChromaDB, sentence-transformers
+
+**VLM**
+- Ollama
+- LLaVA-LLaMA3
+
+**RAG**
+- LangChain
+- ChromaDB
+- sentence-transformers (all-MiniLM-L6-v2)
+- Llama 3
 
 ---
 
