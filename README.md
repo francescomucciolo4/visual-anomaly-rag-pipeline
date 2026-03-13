@@ -1,4 +1,4 @@
-# Anomaly Detection con Autoencoder Convoluzionale sul MVTec Anomaly Detection Dataset - Categoria "Bottle"
+# Industrial Anomaly Detection Pipeline con CAE, VLM e RAG
 
 <p align="center">
   <img src="https://github.com/user-attachments/assets/4e66f3b3-afa7-4be7-9ebf-f0b93bc7378d" width="900" />
@@ -6,9 +6,33 @@
   <em>Risultati Anomaly Detection</em>
 </p>
 
-In questo progetto viene mostrata l'implementazione di un sistema di rilevamento anomalie a livello immagine utilizzando un **Convolutional Autoencoder (CAE)** sul dataset **MVTec Anomaly Detection**, in particolare sulla categoria **"Bottle"**.  
+Pipeline end-to-end per il rilevamento e l'analisi di difetti su bottiglie di vetro, combinando un **Convolutional Autoencoder (CAE)** per il rilevamento delle anomalie, un **Vision Language Model (LLaVA)** per la descrizione visiva dei difetti e un sistema **RAG (Retrieval-Augmented Generation)** per la generazione automatica di report di qualità.
 
-L'obiettivo è identificare difetti sulle bottiglie confrontando l'immagine originale con quella generata dal modello a partire dall'originale, calcolando un **punteggio di anomalia** basato sull'errore di ricostruzione.
+---
+
+## Architettura del Sistema
+```
+                  Immagine
+                      ↓
+        [CAE] → Anomaly Score
+            ↓ (se anomalia)
+        [LLaVA] → Descrizione testuale del difetto
+                      ↓
+        ┌─────────────────────────────┐
+        │         RAG SYSTEM          │
+        │                             │
+        │  Query: descrizione VLM     │
+        │         ↓                   │
+        │  [ChromaDB] similarity      │
+        │  search su Knowledge Base   │
+        │         ↓                   │
+        │  Chunk rilevanti retrieval  │
+        │         ↓                   │
+        │  [Llama 3] genera report    │
+        └─────────────────────────────┘
+                      ↓
+  Report: causa probabile + azioni correttive + urgenza
+```
 
 ---
 
@@ -16,79 +40,100 @@ L'obiettivo è identificare difetti sulle bottiglie confrontando l'immagine orig
 
 Il progetto utilizza la categoria **"Bottle"** del dataset **MVTec Anomaly Detection**:
 
-- **Training set:** 209 immagini senza difetti  
-  - 180 immagini per addestramento  
+- **Training set:** 209 immagini senza difetti
+  - 180 immagini per addestramento
   - 29 immagini per validazione
-- **Test set:** 83 immagini con e senza difetti
-  - 20 immagini "Good" (senza difetti)  
-  - 20 immagini "Broken large" (difetti evidenti)  
-  - 22 immagini "Broken small" (difetti piccoli)  
-  - 21 immagini "Contamination" (contaminazioni)
+- **Test set:** 83 immagini
+  - 20 immagini "Good"
+  - 20 immagini "Broken large"
+  - 22 immagini "Broken small"
+  - 21 immagini "Contamination"
 
->  Il modello è addestrato **solo** su immagini senza difetti.  
-
----
-
-## Architettura del Modello
-
-- **Input:** immagini RGB 256×256  
-- **Encoder convoluzionale:** 4 blocchi Conv + InstanceNorm + LeakyReLU  
-- **Bottleneck convoluzionale 1×1:** compressione canali 256 → 32 → 256  
-- **Decoder simmetrico:** Upsampling bilineare  
-- **Attivazione finale:** Sigmoid  
+> Il modello è addestrato **solo** su immagini senza difetti.
 
 ---
 
-## Metodologia
+## Componenti
 
-1. Addestramento del modello solo su immagini senza difetti  
-2. Ricostruzione delle immagini del test set  
-3. Calcolo dell’**anomaly score** per ogni immagine  
-4. Generazione della **ROC curve**  
-5. Calcolo automatico della **soglia ottimale** tramite Youden’s J statistic (massimizzazione di TPR − FPR)  
-6. Valutazione tramite **confusion matrix**  
+### 1. Convolutional Autoencoder
+- **Input:** immagini RGB 256×256
+- **Encoder:** 4 blocchi Conv + InstanceNorm + LeakyReLU
+- **Bottleneck:** compressione canali 256 → 32 → 256
+- **Decoder:** Upsampling bilineare + Sigmoid
+- **Anomaly score:** errore di ricostruzione (CombinedLoss)
+- **Threshold:** calcolato automaticamente con Youden's J statistic
+
+### 2. Vision Language Model
+- **Modello:** LLaVA-LLaMA3 via Ollama
+- **Input:** immagini classificate come anomale dal CAE + descrizione testuale con classe del difetto come contesto
+- **Output:** descrizione testuale in linguaggio naturale del difetto visibile
+
+### 3. RAG Agent
+- **Vector store:** ChromaDB
+- **Embeddings:** sentence-transformers (all-MiniLM-L6-v2)
+- **LLM:** Llama 3 via Ollama
+- **Input:** descrizioni testuali generate dal VLM
+- **Knowledge base:** catalogo difetti + azioni correttive (indicizzata in ChromaDB)
+- **Retrieval:** similarity search tra la descrizione VLM e i chunk della knowledge base
+- **Output:** report per ogni anomalia con causa probabile e azioni correttive
 
 ---
 
-## Metriche di Valutazione
+## Risultati Anomaly Detection
 
-- **ROC AUC**  
-- **Confusion Matrix**  
-- **Precision**  
-- **Recall**  
-- **F1-score**  
-- Analisi della distribuzione degli anomaly score  
+| Metrica          | Valore  |
+|------------------|---------|
+| ROC AUC          | 0.8992  |
+| Threshold        | 0.0740  |
+| Accuracy Good    | 100.0%  |
+| Accuracy Anomaly | 69.8%   |
+| Mean Accuracy    | 84.9%   |
+| Precision        | 100.0%  |
+| Recall           | 69.8%   |
+| F1 Score         | 0.8224  |
+
+---
+
+## Esempio di Report generato
+```
+Image: test\broken_large\000.png
+Class: broken_large
+Anomaly Score: 0.0893
+VLM Description: The top of the bottle has a large crack in it.
+```
+
+**Quality Control Report**
+
+**Defect Summary:**
+The top of the glass bottle has a large crack, classified as "broken_large". 
+This defect compromises the structural integrity of the bottle and may pose 
+a risk to product safety and quality.
+
+**Probable Causes:**
+1. Improper handling or transportation causing stress and fatigue on the glass
+2. Defective glass manufacturing process or material
+3. Inadequate quality control checks during manufacturing
+
+**Corrective Actions:**
+1. Implement additional quality control checks during manufacturing
+2. Improve handling and transportation procedures
+3. Conduct a thorough investigation into the manufacturing process
+
+**Urgency Level:** High
+
+The presence of a large crack on the bottle's top opening poses a significant risk to product safety and quality. Immediate corrective action is required to prevent further defects and ensure the integrity of the product.
 
 ---
 
 ## Tecnologie Utilizzate
 
-- Python  
-- PyTorch  
-- NumPy  
-- Scikit-learn  
-- Pandas  
-- Matplotlib  
-
----
-
-## Risultati
-
-| Metrica                  | Valore       |
-|--------------------------|-------------|
-| ROC AUC                  | 0.8992      |
-| Threshold                | 0.0740      |
-| Accuracy Good            | 100.0%      |
-| Accuracy Anomaly         | 69.8%       |
-| Mean Accuracy            | 84.9%       |
-| Precision                | 100.0%      |
-| Recall                   | 69.8%       |
-| F1 Score                 | 0.8224      |
+- Python, PyTorch, NumPy, Scikit-learn, Pandas, Matplotlib
+- Ollama (LLaVA, Llama 3)
+- LangChain, ChromaDB, sentence-transformers
 
 ---
 
 ## Note
-
-> Questo repository ha finalità esclusivamente illustrative e di portfolio personale
+> Questo repository ha finalità illustrative e di portfolio personale
 >
-> Parte del codice è stato generato utilizzando Claude 
+> Parte del codice è stato generato con il supporto di Claude
